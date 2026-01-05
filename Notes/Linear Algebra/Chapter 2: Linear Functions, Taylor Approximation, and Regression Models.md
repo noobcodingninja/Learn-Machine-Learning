@@ -1550,3 +1550,564 @@ b) Where will linear model overpredict?
 c) Where will it underpredict?
 d) Will residuals be randomly scattered?
 e) What should you do instead?
+
+---
+
+<a name="summary"></a>
+# Chapter 2 Summary
+
+## Key Concepts
+
+### 1. Linear Functions
+- **Definition:** f(**x**) = **a** · **x** (inner product!)
+- **Properties:** Homogeneity and additivity
+- **Affine:** f(**x**) = **a** · **x** + b (adds bias/intercept)
+- **ML use:** Predictions, decision boundaries, feature combinations
+- **Interpretation:** Coefficients show feature importance
+
+### 2. Taylor Approximation
+- **Idea:** Approximate complex functions with linear ones locally
+- **Formula:** f(**x**) ≈ f(**a**) + ∇f(**a**) · (**x** - **a**)
+- **Gradient:** Vector of partial derivatives
+- **ML use:** Gradient descent, sensitivity analysis, local understanding
+- **Limitation:** Accuracy decreases far from expansion point
+
+### 3. Regression Models
+- **Goal:** Find best linear function fitting data
+- **Model:** ŷ = **w**ᵀ**x** + b
+- **Loss:** Mean Squared Error (MSE)
+- **Solution:** Normal equations or gradient descent
+- **Evaluation:** MSE, RMSE, MAE, R²
+- **Connection:** Linear regression finds best linear approximation to data
+
+## How Everything Connects
+
+```
+Linear Functions
+      ↓
+   (define our model class)
+      ↓
+Taylor Approximation
+      ↓
+   (explains why linear works)
+      ↓
+   (even for nonlinear relationships)
+      ↓
+Regression
+      ↓
+   (finds best linear function for data)
+      ↓
+Machine Learning!
+```
+
+**The Big Picture:**
+1. We want to learn from data
+2. Linear functions are simplest, most interpretable
+3. Taylor tells us: even complex relationships look linear locally
+4. Regression finds the best linear approximation globally
+5. This minimizes prediction errors (squared)
+6. We get closed-form solution (fast!) or use gradient descent (scalable!)
+7. Foundation for everything in supervised learning
+
+## What Makes This Chapter Special
+
+**Three fundamental concepts that power ALL of machine learning:**
+
+1. **Linear functions** - The building blocks
+2. **Taylor approximation** - Why linearization works
+3. **Regression** - How to learn from data
+
+**Every advanced ML technique builds on these:**
+- Neural networks? Stacked linear functions + nonlinearities
+- Logistic regression? Linear function + sigmoid
+- SVM? Linear decision boundary (or kernel trick)
+- Deep learning? Gradients via Taylor approximation
+
+## Key Formulas to Remember
+
+**Linear Function:**
+```
+f(x) = a·x                    (1D)
+f(x) = w·x                    (vector, pure linear)
+f(x) = w·x + b                (affine, with bias)
+```
+
+**Taylor Approximation:**
+```
+f(x) ≈ f(a) + f'(a)(x - a)              (1D)
+f(x) ≈ f(a) + ∇f(a)·(x - a)             (multivariate)
+```
+
+**Linear Regression:**
+```
+ŷ = w·x + b                              (model)
+L = (1/n)Σ(yi - ŷi)²                     (loss)
+w = (X^T X)^(-1) X^T y                   (solution)
+Δw = -α∇L                                (gradient descent)
+```
+
+## Common Pitfalls and Misconceptions
+
+**1. "Linear" vs "Affine"**
+- ❌ Wrong: y = 2x + 3 is linear
+- ✓ Right: y = 2x + 3 is affine (linear + constant)
+- True linear: f(0) must equal 0
+
+**2. "Taylor only works for differentiable functions"**
+- ✓ True! Need derivatives
+- Many ML functions are designed to be differentiable
+- Non-differentiable points (like ReLU at 0) handled carefully
+
+**3. "Linear regression only works for linear relationships"**
+- ❌ Wrong! Can model nonlinear relationships
+- ✓ Right: Add polynomial/interaction features
+- Model is "linear in parameters" not "linear in features"
+
+**4. "More features always better"**
+- ❌ Wrong! Can cause overfitting
+- Too many features vs too little data → poor generalization
+- Need regularization or feature selection
+
+**5. "R² = 0.9 always means good model"**
+- Depends on domain and use case
+- Social sciences: R² = 0.3 might be good
+- Physics: R² = 0.99 might be expected
+- Always check residual plots!
+
+## Practical Tips for ML
+
+**When building models:**
+
+1. **Start simple (linear) first**
+   - Establishes baseline
+   - Fast to train
+   - Easy to interpret
+   - Might be "good enough"
+
+2. **Check your features**
+   - Remove collinear features
+   - Normalize/standardize scales
+   - Consider polynomial/interaction terms
+
+3. **Always visualize**
+   - Plot predictions vs actual
+   - Check residual plots
+   - Look for patterns in errors
+
+4. **Use appropriate metrics**
+   - RMSE for same units as target
+   - MAE for robustness to outliers
+   - R² for proportion of variance explained
+
+5. **Split your data**
+   - Training set: Fit model
+   - Validation set: Tune hyperparameters
+   - Test set: Final evaluation
+   - Never test on training data!
+
+## What's Next?
+
+**Chapter 3** will cover:
+- Norm (vector length) - formalizes distance
+- Distance between vectors - similarity measures
+- Standard deviation - measuring spread
+- Angles and cosine similarity - directional similarity
+
+These build directly on inner products and enable clustering!
+
+**Chapter 4** will cover:
+- Clustering algorithms
+- K-means in detail
+- Objective functions
+- Practical applications
+
+**Chapter 5** will cover:
+- Linear independence - when vectors give new information
+- Basis - minimal spanning sets
+- Orthogonality - perpendicular vectors
+- Gram-Schmidt - making vectors orthogonal
+
+All of these extend what you've learned here!
+
+---
+
+<a name="practice"></a>
+# Comprehensive Practice Problems
+
+## Section 1: Integrated Concepts
+
+**Problem 4.1: Complete Linear Regression Pipeline**
+
+You're hired to predict student grades based on study time.
+
+**Data (hours studied, grade):**
+(2, 65), (4, 75), (6, 85), (8, 95), (10, 98)
+
+a) Calculate x̄ and ȳ
+b) Calculate w (slope) using the formula
+c) Calculate b (intercept)
+d) Write your regression equation
+e) Predict grade for someone who studies 5 hours
+f) Calculate MSE on the training data
+g) Calculate R² score
+h) A new student studies 12 hours. Predict their grade. Should you trust this prediction?
+
+**Problem 4.2: Taylor Approximation in Action**
+
+Function: f(x, y) = x² + xy + y²
+
+Current point: (2, 3)
+- f(2, 3) = 4 + 6 + 9 = 19
+
+Gradients:
+- ∂f/∂x = 2x + y
+- ∂f/∂y = x + 2y
+
+a) Calculate ∇f(2, 3)
+b) Approximate f(2.1, 2.9) using Taylor
+c) Calculate true f(2.1, 2.9)
+d) What's the error?
+e) Would you expect larger error for f(3, 4)? Why?
+
+**Problem 4.3: Feature Engineering Challenge**
+
+You're predicting pizza delivery time with:
+- x₁ = distance (km)
+- x₂ = traffic (1-10 scale)
+- x₃ = time of day (hour, 0-23)
+
+Current model: time = 5·distance + 2·traffic + 0.5·hour + 10
+
+a) Predict delivery time for: 3km, traffic=7, 6pm (hour=18)
+b) Create new feature: rush_hour = 1 if 17 ≤ hour ≤ 19, else 0
+c) Why might rush_hour be better than raw hour?
+d) Create: distance_in_traffic = distance × traffic. Why might this help?
+e) If you add distance², is the model still linear regression? Explain.
+
+**Problem 4.4: Gradient Descent from Scratch**
+
+Loss function: L(w) = (w - 5)² at w = 0
+Learning rate: α = 0.3
+
+a) Calculate gradient: dL/dw at w = 0
+b) Calculate update: w_new = w - α·(dL/dw)
+c) Calculate new loss L(w_new)
+d) Repeat steps a-c for two more iterations
+e) Are you getting closer to optimal w = 5?
+f) What happens if α = 1.5? Try one iteration.
+
+**Problem 4.5: Interpreting Multiple Regression**
+
+Model: salary = 8·experience + 15·education + 5·location + 30
+
+Where:
+- salary in $1000s
+- experience in years
+- education: 1=HS, 2=Bachelor, 3=Master, 4=PhD
+- location: 1=small town, 2=city, 3=metro
+
+a) What's salary for fresh graduate (experience=0, Bachelor, metro)?
+b) How much does each year of experience add?
+c) Value of PhD (4) vs Bachelor (2)?
+d) Moving from small town to metro?
+e) Who earns more: (10 yrs, Bachelor, city) or (5 yrs, Master, metro)?
+
+## Section 2: Real-World Applications
+
+**Problem 4.6: House Price Prediction**
+
+Data:
+
+| sqft | bedrooms | age | price ($1000s) |
+|------|----------|-----|----------------|
+| 1500 | 2 | 20 | 300 |
+| 2000 | 3 | 10 | 400 |
+| 2500 | 4 | 5 | 500 |
+| 1800 | 3 | 15 | 380 |
+
+Fitted model: price = 0.15·sqft + 40·beds - 2·age + 100
+
+a) Predict price for each house in the dataset
+b) Calculate residuals for each
+c) Calculate MSE
+d) Calculate RMSE (in $1000s)
+e) A 2200 sqft, 3 bed, 12 year old house. Predicted price?
+f) Which feature has biggest impact per unit?
+
+**Problem 4.7: Stock Price Movement**
+
+You want to predict next-day stock price change (%) from:
+- x₁ = today's volume change (%)
+- x₂ = market sentiment (-1 to +1)
+- x₃ = news mentions count
+
+Model: change = 0.3·volume + 5·sentiment + 0.1·news + 0.5
+
+a) Interpret each coefficient
+b) If volume up 10%, sentiment +0.5, 20 news mentions, predict change
+c) What needs to happen for >5% increase prediction?
+d) If model has R² = 0.15, is it useful? (Consider stock market randomness)
+
+**Problem 4.8: Medical Dosage**
+
+Predicting effective drug dosage (mg) from:
+- x₁ = patient weight (kg)
+- x₂ = age (years)
+- x₃ = severity (1-10)
+
+Model: dosage = 0.5·weight + 0.2·age + 3·severity + 10
+
+a) Calculate dosage for: 70kg, 45 years, severity=6
+b) Two patients same weight/age, but severity differs by 3. Dosage difference?
+c) Why might you want to be extra careful trusting this model?
+d) What additional features might improve predictions?
+
+**Problem 4.9: E-commerce Revenue**
+
+Predicting daily revenue from:
+- x₁ = website visitors (1000s)
+- x₂ = average time on site (minutes)
+- x₃ = email campaign sent (0 or 1)
+
+Model: revenue = 5·visitors + 2·time + 15·email + 100
+
+(Revenue in $1000s)
+
+a) Revenue on a day with 10k visitors, 8 min avg time, no email?
+b) Expected revenue boost from email campaign?
+c) Hiring an SEO expert adds 2k visitors. Revenue impact?
+d) Which is better: +1k visitors or +2 min avg time?
+
+**Problem 4.10: Credit Risk Scoring**
+
+Predicting default probability (0-1) using linear model:
+- x₁ = credit score (300-850)
+- x₂ = debt-to-income ratio (0-1)
+- x₃ = number of late payments
+
+Model: p(default) = -0.002·score + 0.5·debt_ratio + 0.1·late_payments + 1.5
+
+a) Calculate probability for: score=650, ratio=0.4, 2 late payments
+b) What credit score needed to offset 5 late payments?
+c) Why might linear regression be problematic for probabilities?
+d) What would you use instead? (Hint: next chapter material)
+
+## Section 3: Debugging and Understanding
+
+**Problem 4.11: Finding Errors in Reasoning**
+
+A student says: "My linear regression has w = (5, -3, 2). The second feature is negative, so it's the least important."
+
+a) What's wrong with this reasoning?
+b) If features have different scales, what should you do first?
+c) How do you properly assess feature importance?
+
+**Problem 4.12: Overfitting Diagnosis**
+
+You fit two models:
+- Simple: 3 features, Train MSE = 25, Test MSE = 28
+- Complex: 20 features, Train MSE = 5, Test MSE = 45
+
+a) Which model performs better on training?
+b) Which performs better on test?
+c) Which model is overfitting?
+d) What should you do?
+e) What is "generalization gap"?
+
+**Problem 4.13: Understanding Residuals**
+
+Perfect model: ŷᵢ = yᵢ for all i
+
+a) What would residual plot look like?
+b) What would MSE be?
+c) What would R² be?
+d) Why is this impossible in practice?
+e) What residual pattern indicates heteroscedasticity?
+
+**Problem 4.14: Taylor Approximation Limitations**
+
+Function: f(x) = e^x
+Expansion at a = 0: f(x) ≈ 1 + x
+
+a) Approximate e^0.1 and calculate error
+b) Approximate e^0.5 and calculate error
+c) Approximate e^2.0 and calculate error
+d) What do you notice about errors?
+e) How could you improve approximation accuracy?
+
+**Problem 4.15: Collinearity Problem**
+
+You're predicting house prices with:
+- x₁ = square feet
+- x₂ = square meters (x₂ = 0.0929·x₁)
+- x₃ = bedrooms
+
+a) Are x₁ and x₂ linearly independent?
+b) What problems does this cause for regression?
+c) What is multicollinearity?
+d) How would you detect it?
+e) How would you fix it?
+
+## Section 4: Advanced Synthesis
+
+**Problem 4.16: Polynomial Regression**
+
+Data shows quadratic relationship: y = x²
+
+You fit linear model: ŷ = wx + b
+
+a) Where will model underpredict most?
+b) Where will it overpredict?
+c) Create feature x₂ = x². New model: ŷ = w₁x + w₂x² + b
+d) Is this still "linear regression"? Why?
+e) What's the difference between linear model and linear relationship?
+
+**Problem 4.17: Gradient Descent Dynamics**
+
+Loss landscape: L(w) = w² - 4w + 5 (parabola, minimum at w = 2)
+
+Starting at w = 0, learning rate α = 0.1:
+
+a) Calculate gradient dL/dw at w = 0
+b) Calculate w after 1 step
+c) Calculate w after 2 steps
+d) Continue until convergence (< 5 steps)
+e) What happens if α = 2.1? (Too large)
+
+**Problem 4.18: Bias-Variance Tradeoff**
+
+Model A: High bias, low variance (underfitting)
+Model B: Low bias, high variance (overfitting)
+Model C: Balanced
+
+a) Which has lowest training error?
+b) Which has lowest test error?
+c) As model complexity increases, what happens to bias?
+d) What happens to variance?
+e) How do you find the "sweet spot"?
+
+**Problem 4.19: Cross-Validation**
+
+You have 100 data points. Use 5-fold cross-validation.
+
+a) How many points in each fold?
+b) How many times is each point used for testing?
+c) Why is this better than single train/test split?
+d) What is the final performance estimate?
+e) What's the disadvantage of cross-validation?
+
+**Problem 4.20: Feature Scaling Impact**
+
+Two features:
+- x₁ = income ($20k-$200k)
+- x₂ = age (20-65 years)
+
+Weights before scaling: w₁ = 0.0001, w₂ = 0.5
+
+a) Which feature dominates purely by scale?
+b) Apply standardization: x'ᵢ = (xᵢ - mean) / std
+c) Why does this help gradient descent?
+d) Do predictions change after scaling? Why/why not?
+e) Do weights change after scaling? How should you interpret them?
+
+## Section 5: Theoretical Understanding
+
+**Problem 4.21: Proving Linear Properties**
+
+For f(x) = ax, prove:
+
+a) f(αx) = αf(x) for any scalar α
+b) f(x + y) = f(x) + f(y)
+c) If g(x) = ax + b where b ≠ 0, show g is NOT linear
+d) Show that sum of linear functions is linear
+e) Show that composition of linear functions is linear
+
+**Problem 4.22: Least Squares Derivation**
+
+Loss: L(w, b) = Σ(yᵢ - wxᵢ - b)²
+
+a) Expand one term: (yᵢ - wxᵢ - b)²
+b) Take ∂L/∂b and set to zero
+c) Solve for b in terms of w, xᵢ, yᵢ
+d) Interpret: what does this tell you about the fitted line?
+e) Why does the line pass through (x̄, ȳ)?
+
+**Problem 4.23: Gradient as Direction**
+
+Function: f(x, y) = x² + 4y²
+
+At point (1, 1): ∇f = (2, 8)
+
+a) In which direction does f increase fastest?
+b) What's the magnitude of this maximum increase rate?
+c) In which direction does f decrease fastest?
+d) What directions leave f unchanged (level curves)?
+e) If you move in direction (1, 0), how does f change?
+
+**Problem 4.24: Normal Equations Understanding**
+
+Solution: w = (X^T X)^(-1) X^T y
+
+a) What are dimensions of X if n = 100 examples, d = 5 features?
+b) What are dimensions of X^T X?
+c) When is X^T X not invertible?
+d) What does this mean geometrically?
+e) What do you do if X^T X is singular?
+
+**Problem 4.25: R² Interpretation**
+
+R² = 1 - (SS_res / SS_tot)
+
+where SS_tot = Σ(yᵢ - ȳ)²
+
+a) What does SS_tot measure?
+b) What does SS_res measure?
+c) If predictions are perfect, what's R²?
+d) If predictions always equal ȳ, what's R²?
+e) Can R² be negative? When?
+
+---
+
+# Answer Key (Selected Problems)
+
+**Problem 4.1:**
+a) x̄ = 6, ȳ = 83.6
+b) w = 4 (exactly linear relationship!)
+c) b = 83.6 - 4(6) = 59.6
+d) grade = 4·hours + 59.6
+e) grade = 4(5) + 59.6 = 79.6
+h) 12 hours → 107.6% (> 100%!). Don't trust: extrapolating beyond data range!
+
+**Problem 4.4:**
+a) dL/dw = 2(w - 5) = 2(0 - 5) = -10
+b) w_new = 0 - 0.3(-10) = 3
+c) L(3) = (3-5)² = 4 (reduced from L(0) = 25!)
+f) With α = 1.5: w_new = 0 - 1.5(-10) = 15. L(15) = 100 (diverged! Too large α)
+
+**Problem 4.15:**
+a) No! x₂ = 0.0929x₁ (perfect linear dependence)
+b) X^T X becomes singular (not invertible)
+c) When predictors are correlated
+d) Check correlation matrix or compute condition number
+e) Remove one of the correlated features
+
+**Problem 4.17:**
+dL/dw = 2w - 4
+e) α = 2.1: Update by -α(2w-4) = -2.1(2w-4). At w=0: step to w=8.4. Next: w oscillates with growing amplitude (diverges!)
+
+---
+
+# Congratulations!
+
+You've completed Chapter 2! You now understand:
+- ✅ Linear functions and why they matter
+- ✅ How Taylor approximation connects to linearization
+- ✅ Linear regression and how to fit models to data
+- ✅ The connection between all three concepts
+- ✅ How these form the foundation of machine learning
+
+**You're ready for Chapter 3: Norm, Distance, Standard Deviation, and Angles!**
+
+---
+
+*End of Chapter 2*
