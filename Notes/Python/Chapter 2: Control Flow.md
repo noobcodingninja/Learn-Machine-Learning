@@ -3117,6 +3117,3 @@ for counter in range(5):
 # Same result, less code, less chance of errors!
 ```
 
-### Looping with range()
-
-`range
