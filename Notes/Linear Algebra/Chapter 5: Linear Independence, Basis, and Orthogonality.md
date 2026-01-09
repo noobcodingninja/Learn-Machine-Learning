@@ -1972,3 +1972,4096 @@ Key takeaways:
 - ✅ Foundation for Gram-Schmidt process
 
 Next: Section 5.5 - Gram-Schmidt Process
+
+# Chapter 5: Section 5 - Gram-Schmidt Process
+
+<a name="gram-schmidt"></a>
+# 5. Gram-Schmidt Process
+
+## The Core Question: How Do We Build Perpendicular Directions?
+
+Imagine you're in a dark room trying to understand its shape. You have a flashlight.
+
+**Your strategy:**
+- First, shine the light straight ahead → that's one direction
+- Next, you want to explore a NEW direction, but it should be completely different from the first
+- Then another direction that's different from both previous ones
+- And so on...
+
+**Question:** How do you ensure each new direction is truly "different" (perpendicular) from all previous ones?
+
+**Problem without perpendicular directions:**
+If your second direction partially overlaps with the first, you're wasting effort exploring areas you've already seen!
+
+**Solution:** Remove the "overlap" before exploring the new direction!
+
+**This is exactly what the Gram-Schmidt process does!**
+
+## What Problem Does Gram-Schmidt Solve?
+
+**The Problem We Face:**
+
+You have a set of linearly independent vectors: **{v₁, v₂, v₃, ..., vₖ}**
+
+But they're NOT orthogonal - they point in "messy" directions with overlap.
+
+**What we want:**
+- Keep the same span (reach the same space)
+- But use orthogonal vectors instead
+- Even better: orthonormal vectors!
+
+**Why do we want this?**
+- Easier calculations (as we saw in Section 4)
+- Numerical stability in computers
+- Clearer geometric understanding
+- Foundation for many ML algorithms
+
+**Real-world analogy:**
+- **Before:** You have k crooked, overlapping rulers
+- **After:** You have k perfectly perpendicular rulers measuring the same space
+- Same space covered, but much cleaner system!
+
+## The Root Cause: Why Are Vectors Not Orthogonal?
+
+**Let's think about what "not orthogonal" means:**
+
+Take two vectors **v₁** and **v₂** where **v₁ · v₂ ≠ 0**
+
+**Question:** Why is their dot product non-zero?
+
+**Answer:** Because **v₂** has a component in the direction of **v₁**!
+
+**Geometric picture:**
+```
+        v₂
+       /
+      /
+     /______ projection of v₂ onto v₁
+    /
+   v₁
+```
+
+**The projection of v₂ onto v₁** is the "overlap" - the part of **v₂** that goes in the same direction as **v₁**.
+
+**Root cause:** This overlap makes them non-orthogonal!
+
+## So How Can We Remove This Overlap?
+
+**Natural question:** If the overlap is the problem, can we just... remove it?
+
+**Yes! That's the brilliant insight!**
+
+**If we have:**
+- **v₂** = (part parallel to **v₁**) + (part perpendicular to **v₁**)
+
+**Then we can isolate the perpendicular part:**
+- Perpendicular part = **v₂** - (part parallel to **v₁**)
+- Perpendicular part = **v₂** - proj**ᵥ₁**(**v₂**)
+
+**This perpendicular part is orthogonal to v₁!**
+
+**Let's verify:**
+- Let **w₂** = **v₂** - proj**ᵥ₁**(**v₂**)
+- **w₂ · v₁** = (**v₂** - proj**ᵥ₁**(**v₂**)) · **v₁**
+- = **v₂ · v₁** - proj**ᵥ₁**(**v₂**) · **v₁**
+
+Now, proj**ᵥ₁**(**v₂**) = ((**v₂ · v₁**) / ||**v₁**||²)**v₁**
+
+So: proj**ᵥ₁**(**v₂**) · **v₁** = ((**v₂ · v₁**) / ||**v₁**||²) **v₁ · v₁**
+                                  = ((**v₂ · v₁**) / ||**v₁**||²) ||**v₁**||²
+                                  = **v₂ · v₁**
+
+Therefore: **w₂ · v₁** = **v₂ · v₁** - **v₂ · v₁** = 0 ✓
+
+**Beautiful! The overlap is removed!**
+
+## The Gram-Schmidt Process: Step by Step
+
+**Goal:** Convert linearly independent set {**v₁, v₂, ..., vₖ**} into orthogonal set {**u₁, u₂, ..., uₖ**}
+
+**The algorithm:**
+
+**Step 1:** Keep the first vector as is
+- **u₁** = **v₁**
+- (Nothing to make it orthogonal to yet!)
+
+**Step 2:** Make **v₂** orthogonal to **u₁**
+- **u₂** = **v₂** - proj**ᵤ₁**(**v₂**)
+- Remove the component of **v₂** in the direction of **u₁**
+
+**Step 3:** Make **v₃** orthogonal to BOTH **u₁** AND **u₂**
+- **u₃** = **v₃** - proj**ᵤ₁**(**v₃**) - proj**ᵤ₂**(**v₃**)
+- Remove components in both previous directions
+
+**Step 4:** Continue this pattern...
+- **u₄** = **v₄** - proj**ᵤ₁**(**v₄**) - proj**ᵤ₂**(**v₄**) - proj**ᵤ₃**(**v₄**)
+
+**General step i:**
+- **uᵢ** = **vᵢ** - Σⱼ₌₁^(i-1) proj**ᵤⱼ**(**vᵢ**)
+- Remove ALL overlaps with previous orthogonal vectors
+
+**Optional final step:** Normalize to get orthonormal
+- **q₁** = **u₁** / ||**u₁**||
+- **q₂** = **u₂** / ||**u₂**||
+- etc.
+
+## Why Does This Work?
+
+**Let's think through why each new vector is orthogonal to all previous ones:**
+
+**After Step 2:** Is **u₂ ⊥ u₁**?
+- Yes! We specifically removed the **u₁** component from **v₂**
+
+**After Step 3:** Is **u₃ ⊥ u₁** and **u₃ ⊥ u₂**?
+- We removed BOTH the **u₁** component AND the **u₂** component from **v₃**
+- So **u₃** is perpendicular to both!
+
+**The pattern continues:** Each new vector has ALL previous components removed, so it's perpendicular to ALL previous vectors.
+
+**Key insight:** By systematically removing overlaps, we build perpendicular directions one at a time!
+
+## Detailed Example 5.1: Gram-Schmidt in ℝ²
+
+**Given vectors:**
+- **v₁** = (3, 1)
+- **v₂** = (2, 2)
+
+**Goal:** Create orthogonal set {**u₁, u₂**}
+
+### Step 1: First vector
+
+**u₁** = **v₁** = (3, 1)
+
+### Step 2: Make v₂ orthogonal to u₁
+
+**Calculate projection of v₂ onto u₁:**
+
+proj**ᵤ₁**(**v₂**) = ((**v₂ · u₁**) / ||**u₁**||²) **u₁**
+
+**v₂ · u₁** = (2)(3) + (2)(1) = 6 + 2 = 8
+
+||**u₁**||² = 3² + 1² = 9 + 1 = 10
+
+proj**ᵤ₁**(**v₂**) = (8/10)(3, 1) = (4/5)(3, 1) = (12/5, 4/5)
+
+**Remove the overlap:**
+
+**u₂** = **v₂** - proj**ᵤ₁**(**v₂**)
+      = (2, 2) - (12/5, 4/5)
+      = (10/5 - 12/5, 10/5 - 4/5)
+      = (-2/5, 6/5)
+
+### Verify orthogonality:
+
+**u₁ · u₂** = (3)(-2/5) + (1)(6/5) = -6/5 + 6/5 = 0 ✓
+
+**Perfect! They're orthogonal!**
+
+### Geometric interpretation:
+
+**Before:** **v₁** and **v₂** pointed in somewhat similar directions (not perpendicular)
+
+**After:** **u₁** and **u₂** are exactly perpendicular
+
+**Same span:** span{**v₁, v₂**} = span{**u₁, u₂**} = all of ℝ²
+
+### Optional: Create orthonormal basis
+
+**Normalize u₁:**
+
+||**u₁**|| = √(9 + 1) = √10
+
+**q₁** = (3, 1) / √10 = (3/√10, 1/√10)
+
+**Normalize u₂:**
+
+||**u₂**|| = √(4/25 + 36/25) = √(40/25) = √(8/5) = 2√(2/5) = 2/√5
+
+**q₂** = (-2/5, 6/5) / (2/√5) = (-2/5, 6/5) × (√5/2) = (-√5/5, 3√5/5)
+
+**Verify orthonormal:**
+- **q₁ · q₂** = (3/√10)(-√5/5) + (1/√10)(3√5/5) = -3√5/(5√10) + 3√5/(5√10) = 0 ✓
+- ||**q₁**|| = 1 ✓
+- ||**q₂**|| = 1 ✓
+
+## Detailed Example 5.2: Gram-Schmidt in ℝ³
+
+**Given vectors:**
+- **v₁** = (1, 1, 0)
+- **v₂** = (1, 0, 1)  
+- **v₃** = (0, 1, 1)
+
+**Goal:** Create orthogonal set {**u₁, u₂, u₃**}
+
+### Step 1: First vector
+
+**u₁** = **v₁** = (1, 1, 0)
+
+### Step 2: Make v₂ orthogonal to u₁
+
+**Calculate projection:**
+
+**v₂ · u₁** = (1)(1) + (0)(1) + (1)(0) = 1
+
+||**u₁**||² = 1² + 1² + 0² = 2
+
+proj**ᵤ₁**(**v₂**) = (1/2)(1, 1, 0) = (1/2, 1/2, 0)
+
+**Remove overlap:**
+
+**u₂** = **v₂** - proj**ᵤ₁**(**v₂**)
+      = (1, 0, 1) - (1/2, 1/2, 0)
+      = (1/2, -1/2, 1)
+
+**Verify:** **u₁ · u₂** = (1)(1/2) + (1)(-1/2) + (0)(1) = 1/2 - 1/2 = 0 ✓
+
+### Step 3: Make v₃ orthogonal to BOTH u₁ and u₂
+
+**Calculate projection onto u₁:**
+
+**v₃ · u₁** = (0)(1) + (1)(1) + (1)(0) = 1
+
+proj**ᵤ₁**(**v₃**) = (1/2)(1, 1, 0) = (1/2, 1/2, 0)
+
+**Calculate projection onto u₂:**
+
+**v₃ · u₂** = (0)(1/2) + (1)(-1/2) + (1)(1) = 0 - 1/2 + 1 = 1/2
+
+||**u₂**||² = (1/2)² + (-1/2)² + 1² = 1/4 + 1/4 + 1 = 3/2
+
+proj**ᵤ₂**(**v₃**) = (1/2)/(3/2) × (1/2, -1/2, 1) = (1/3)(1/2, -1/2, 1) = (1/6, -1/6, 1/3)
+
+**Remove BOTH overlaps:**
+
+**u₃** = **v₃** - proj**ᵤ₁**(**v₃**) - proj**ᵤ₂**(**v₃**)
+      = (0, 1, 1) - (1/2, 1/2, 0) - (1/6, -1/6, 1/3)
+      = (0 - 1/2 - 1/6, 1 - 1/2 + 1/6, 1 - 0 - 1/3)
+      = (-3/6 - 1/6, 3/6 + 1/6, 3/3 - 1/3)
+      = (-4/6, 4/6, 2/3)
+      = (-2/3, 2/3, 2/3)
+
+### Verify orthogonality:
+
+**u₁ · u₃** = (1)(-2/3) + (1)(2/3) + (0)(2/3) = -2/3 + 2/3 = 0 ✓
+
+**u₂ · u₃** = (1/2)(-2/3) + (-1/2)(2/3) + (1)(2/3) = -1/3 - 1/3 + 2/3 = 0 ✓
+
+**Perfect! All three are mutually orthogonal!**
+
+### Result:
+
+**Orthogonal basis:** {(1, 1, 0), (1/2, -1/2, 1), (-2/3, 2/3, 2/3)}
+
+**These span the same space as the original vectors, but are perpendicular!**
+
+## The Pattern Behind Gram-Schmidt
+
+**Let's step back and see the beautiful pattern:**
+
+**Question to yourself:** "I have a new vector **vᵢ**. How do I make it orthogonal to all my previous orthogonal vectors **u₁, u₂, ..., uᵢ₋₁**?"
+
+**Answer:** "Remove the parts that overlap with each previous vector!"
+
+**How do we find these overlapping parts?** 
+- Use projections! proj**ᵤⱼ**(**vᵢ**) gives us the component of **vᵢ** in the direction of **uⱼ**
+
+**What's the root cause of non-orthogonality?**
+- The new vector **vᵢ** has components pointing in the same directions as previous vectors
+
+**How does Gram-Schmidt fix it?**
+- By systematically subtracting out ALL these overlapping components, leaving only the "new" direction
+
+**Why does this give us orthogonal vectors?**
+- After removing all components in previous directions, what's left MUST be perpendicular to all previous vectors!
+
+## Common Mistakes and How to Avoid Them
+
+### Mistake 1: Projecting onto original vectors instead of orthogonalized ones
+
+**Wrong:**
+```
+u₃ = v₃ - proj_v₁(v₃) - proj_v₂(v₃)  ❌
+```
+
+**Right:**
+```
+u₃ = v₃ - proj_u₁(v₃) - proj_u₂(v₃)  ✓
+```
+
+**Why it matters:** The **u** vectors are already orthogonal, but the **v** vectors are not! We must project onto the orthogonal vectors we've already created.
+
+### Mistake 2: Forgetting to include all previous projections
+
+**Wrong:**
+```
+u₃ = v₃ - proj_u₂(v₃)  ❌ (forgot u₁!)
+```
+
+**Right:**
+```
+u₃ = v₃ - proj_u₁(v₃) - proj_u₂(v₃)  ✓
+```
+
+**Why it matters:** We need to remove overlaps with ALL previous vectors, not just the most recent one!
+
+### Mistake 3: Using incorrect projection formula
+
+**Remember:** proj**ᵤ**(**v**) = ((**v · u**) / ||**u**||²) **u**
+
+**If u is already normalized (unit vector):**
+proj**ᵤ**(**v**) = (**v · u**) **u**  (simpler!)
+
+### Mistake 4: Not verifying orthogonality
+
+**Always check:** **uᵢ · uⱼ** = 0 for all i ≠ j
+
+If not zero, you made a calculation error!
+
+## Modified Gram-Schmidt (More Numerically Stable)
+
+**Classical Gram-Schmidt** (what we've shown):
+- Calculate all projections at once
+- **uᵢ** = **vᵢ** - Σⱼ₌₁^(i-1) proj**ᵤⱼ**(**vᵢ**)
+
+**Modified Gram-Schmidt** (better for computers):
+- Update vector after each projection
+- More stable when dealing with nearly-dependent vectors
+
+**Algorithm:**
+```
+u₁ = v₁
+
+For i = 2 to k:
+    uᵢ = vᵢ
+    For j = 1 to i-1:
+        uᵢ = uᵢ - proj_uⱼ(uᵢ)  // Update uᵢ immediately
+```
+
+**Why is this better?**
+- Reduces accumulation of rounding errors
+- Each subtraction uses the most up-to-date vector
+- More accurate when vectors are almost dependent
+
+**In practice:** Computers use Modified Gram-Schmidt for numerical stability
+
+## Applications in Machine Learning
+
+### 1. QR Decomposition
+
+**Any matrix A can be factored as:**
+
+A = QR
+
+where:
+- **Q** has orthonormal columns (from Gram-Schmidt!)
+- **R** is upper triangular
+
+**How Gram-Schmidt creates QR:**
+- Columns of A are our original vectors **v₁, v₂, ...**
+- Apply Gram-Schmidt → get orthogonal vectors **u₁, u₂, ...**
+- Normalize → get orthonormal vectors (columns of Q)
+- The coefficients used form R
+
+**Uses of QR:**
+- Solving least squares problems
+- Computing eigenvalues
+- Numerically stable matrix computations
+
+### 2. Orthogonalizing Features
+
+**Problem:** You have correlated features in your dataset
+
+**Example:**
+- Feature 1: House area
+- Feature 2: Number of rooms (highly correlated with area)
+
+**Solution:** Apply Gram-Schmidt!
+- Keep Feature 1 as is
+- Transform Feature 2 to be orthogonal to Feature 1
+- Now they capture independent information!
+
+**Benefits:**
+- Removes multicollinearity
+- Each feature adds unique information
+- Better for regression models
+
+### 3. Principal Component Analysis (PCA)
+
+**PCA finds orthogonal directions of maximum variance**
+
+**Connection to Gram-Schmidt:**
+- PCA computes eigenvectors of covariance matrix
+- These eigenvectors are orthogonal
+- If they weren't, we'd use Gram-Schmidt to make them so!
+- Gram-Schmidt ensures orthogonality in numerical implementations
+
+### 4. Conjugate Gradient Method
+
+**For solving large systems Ax = b:**
+- Creates sequence of search directions
+- These directions must be orthogonal (actually "conjugate")
+- Uses Gram-Schmidt-like process to ensure orthogonality
+- Much faster than standard methods for huge systems
+
+### 5. Signal Processing
+
+**Fourier transforms decompose signals into orthogonal components**
+
+**Why orthogonal basis matters:**
+- Each frequency component is independent
+- No interference between components
+- Easy to filter specific frequencies
+- Gram-Schmidt ensures clean separation
+
+## Example 5.3: Application to Data
+
+**Dataset:** 3 measurements from 4 experiments
+
+```
+v₁ = (1, 2, 1, 0) - Measurement 1
+v₂ = (1, 3, 1, 0) - Measurement 2  
+v₃ = (1, 2, 0, 1) - Measurement 3
+```
+
+**These are correlated! Let's orthogonalize them.**
+
+### Step 1: Keep v₁
+
+**u₁** = (1, 2, 1, 0)
+
+### Step 2: Orthogonalize v₂
+
+**v₂ · u₁** = 1 + 6 + 1 + 0 = 8
+||**u₁**||² = 1 + 4 + 1 + 0 = 6
+
+proj**ᵤ₁**(**v₂**) = (8/6)(1, 2, 1, 0) = (4/3, 8/3, 4/3, 0)
+
+**u₂** = (1, 3, 1, 0) - (4/3, 8/3, 4/3, 0) = (-1/3, 1/3, -1/3, 0)
+
+### Step 3: Orthogonalize v₃
+
+**v₃ · u₁** = 1 + 4 + 0 + 0 = 5
+proj**ᵤ₁**(**v₃**) = (5/6)(1, 2, 1, 0) = (5/6, 10/6, 5/6, 0)
+
+**v₃ · u₂** = -1/3 + 2/3 + 0 + 0 = 1/3
+||**u₂**||² = 1/9 + 1/9 + 1/9 + 0 = 3/9 = 1/3
+
+proj**ᵤ₂**(**v₃**) = (1/3)/(1/3) × (-1/3, 1/3, -1/3, 0) = (-1/3, 1/3, -1/3, 0)
+
+**u₃** = (1, 2, 0, 1) - (5/6, 10/6, 5/6, 0) - (-1/3, 1/3, -1/3, 0)
+      = (1 - 5/6 + 1/3, 2 - 10/6 - 1/3, 0 - 5/6 + 1/3, 1)
+      = (3/6, 1/6, -3/6, 1)
+      = (1/2, 1/6, -1/2, 1)
+
+### Result: Orthogonal features
+
+**New features:**
+- **u₁** = (1, 2, 1, 0) - Base measurement
+- **u₂** = (-1/3, 1/3, -1/3, 0) - Variation uncorrelated with u₁
+- **u₃** = (1/2, 1/6, -1/2, 1) - Variation uncorrelated with both
+
+**Each new feature captures independent information!**
+
+## Visualizing the Process
+
+**Think of Gram-Schmidt as building a coordinate system step by step:**
+
+**Step 1:** Place first axis along **v₁**
+```
+     v₁
+    ──────→ u₁
+```
+
+**Step 2:** Place second axis perpendicular to first
+```
+        ↑ u₂ (perpendicular)
+        |
+        |
+    ────┼───→ u₁
+        |
+```
+
+**Step 3:** Place third axis perpendicular to both
+```
+        ⊗ u₃ (coming out of page)
+        
+        ↑ u₂
+        |
+    ────┼───→ u₁
+```
+
+**At each step, we're building a perpendicular coordinate system!**
+
+## When Can Gram-Schmidt Fail?
+
+**Gram-Schmidt requires linearly independent input vectors.**
+
+**What happens if vectors are dependent?**
+
+**Example:**
+- **v₁** = (1, 0)
+- **v₂** = (2, 0) = 2**v₁**
+
+**Apply Gram-Schmidt:**
+- **u₁** = (1, 0)
+- **u₂** = **v₂** - proj**ᵤ₁**(**v₂**)
+        = (2, 0) - 2(1, 0)
+        = (0, 0)
+
+**We get the zero vector!**
+
+**This tells us:** **v₂** is completely in the direction of **v₁** - it adds no new information!
+
+**In practice:**
+- Check that ||**uᵢ**|| ≠ 0 at each step
+- If you get zero vector, original vectors were dependent
+- Remove the dependent vector and continue
+
+**Numerical issue:**
+- On computers, might get very small ||**uᵢ**|| instead of exactly zero
+- This indicates near-dependence
+- Modified Gram-Schmidt handles this better
+
+## Practice Problems - Gram-Schmidt
+
+**Problem 5.1: Basic Application**
+
+Apply Gram-Schmidt to create an orthogonal set:
+
+a) **v₁** = (1, 1), **v₂** = (1, -1)
+b) **v₁** = (1, 0, 0), **v₂** = (1, 1, 0)
+c) **v₁** = (1, 2), **v₂** = (2, 1)
+
+**Problem 5.2: Three Vectors in ℝ³**
+
+Apply Gram-Schmidt:
+
+**v₁** = (1, 0, 0)
+**v₂** = (1, 1, 0)  
+**v₃** = (1, 1, 1)
+
+a) Find orthogonal set {**u₁, u₂, u₃**}
+b) Verify all pairs are orthogonal
+c) Normalize to create orthonormal basis
+
+**Problem 5.3: Identifying Dependence**
+
+Apply Gram-Schmidt to:
+
+**v₁** = (1, 2, 3)
+**v₂** = (2, 4, 6)
+**v₃** = (1, 0, 0)
+
+a) What happens when you process **v₂**?
+b) Why does this happen?
+c) Which vectors should you keep?
+
+**Problem 5.4: QR Decomposition**
+
+Matrix A has columns:
+**v₁** = (1, 1, 0)
+**v₂** = (0, 1, 1)
+
+a) Apply Gram-Schmidt to get orthonormal columns (matrix Q)
+b) Express original vectors in terms of orthonormal ones
+c) What is R in the QR factorization?
+
+**Problem 5.5: Orthogonalizing Functions**
+
+Consider functions on [0, 1] with inner product ⟨f, g⟩ = ∫₀¹ f(x)g(x)dx
+
+Apply Gram-Schmidt to:
+- f₁(x) = 1
+- f₂(x) = x
+- f₃(x) = x²
+
+(These become Legendre polynomials!)
+
+**Problem 5.6: Application to Data**
+
+You have features:
+- **x₁** = (1, 2, 3, 4) - Age
+- **x₂** = (2, 3, 4, 5) - Experience ≈ Age + 1
+- **x₃** = (1, 1, 2, 2) - Education level
+
+a) Apply Gram-Schmidt to decorrelate features
+b) Interpret the new orthogonal features
+c) Which original feature is most "unique"?
+
+**Problem 5.7: Geometric Understanding**
+
+In ℝ², you have **v₁** = (3, 0) and **v₂** = (1, 1)
+
+a) Sketch both vectors
+b) Apply Gram-Schmidt - sketch resulting **u₁** and **u₂**
+c) Verify geometrically that they're perpendicular
+d) Do they span the same space as original?
+
+**Problem 5.8: Computational Challenge**
+
+Apply Gram-Schmidt to nearly-dependent vectors:
+
+**v₁** = (1, 0, 0)
+**v₂** = (1, 0.0001, 0)
+**v₃** = (0, 0, 1)
+
+a) What happens to ||**u₂**||?
+b) What does this indicate?
+c) Why is this problematic for computers?
+
+**Problem 5.9: Building from Scratch**
+
+You want an orthonormal basis for ℝ³ where first vector is (1, 1, 1).
+
+a) Normalize (1, 1, 1) → **q₁**
+b) Choose ANY vector not parallel to **q₁** → **v₂**
+c) Apply Gram-Schmidt to get **q₂**
+d) Choose ANY third vector → **v₃**
+e) Apply Gram-Schmidt to get **q₃**
+f) Verify you have orthonormal basis
+
+**Problem 5.10: Modified vs Classical**
+
+For **v₁** = (1, 1, 1), **v₂** = (1, 1, 0), **v₃** = (1, 0, 0):
+
+a) Apply classical Gram-Schmidt (all projections at once)
+b) Apply modified Gram-Schmidt (update after each projection)
+c) Are results identical?
+d) Which would be better if vectors were nearly dependent?
+
+---
+
+**End of Section 5.5: Gram-Schmidt Process**
+
+**Key takeaways:**
+- ✅ Gram-Schmidt converts any independent set to orthogonal set
+- ✅ Core idea: Remove overlaps (projections) systematically  
+- ✅ Build perpendicular directions one at a time
+- ✅ Results in same span, but orthogonal basis
+- ✅ Foundation for QR decomposition
+- ✅ Critical for numerical stability in computations
+- ✅ Modified version better for computers
+- ✅ Fails only when input vectors are dependent
+
+**Next: Section 5.6 - Applications to Machine Learning**
+
+---
+
+<a name="applications"></a>
+# 6. Applications to Machine Learning
+
+## The Core Question: Why Does All This Math Matter for AI?
+
+Imagine you're teaching a computer to recognize cats in photos.
+
+**You have:** 1 million photos, each 1000×1000 pixels = 1 million dimensions per photo!
+
+**Problem:** That's way too much data!
+- Takes forever to process
+- Needs massive memory
+- Most information is redundant (neighboring pixels are similar)
+
+**Question we should ask ourselves:** "Do we really need all 1 million dimensions? Or is there a smaller set of directions that captures most of the important information?"
+
+**This is where linear independence, basis, orthogonality, and Gram-Schmidt become crucial!**
+
+**Root cause of the problem:** High-dimensional data has lots of redundancy - many dimensions are not truly independent.
+
+**How can we solve this?** Find the fundamental, independent directions that capture the essence of the data!
+
+## Application 1: Principal Component Analysis (PCA)
+
+### What Problem Does PCA Solve?
+
+**Scenario:** You have a dataset with 100 features
+
+**Problems you face:**
+1. **Computational cost:** Processing 100 dimensions is slow
+2. **Visualization:** Can't plot 100-dimensional data
+3. **Overfitting:** Too many features, not enough data
+4. **Redundancy:** Many features are correlated (not independent!)
+
+**Question:** Can we represent the data using fewer dimensions without losing much information?
+
+**Answer:** Yes! Use PCA to find the most important directions!
+
+### The Root Cause: Redundancy in High Dimensions
+
+**Let's think about why data has redundancy:**
+
+**Example:** Predicting house prices with features:
+- Living area (sq ft)
+- Number of rooms
+- Lot size
+- Number of bathrooms
+- Total area (living + lot)
+
+**Notice:** Total area = Living area + Lot size (redundant!)
+
+**More subtle:** Number of rooms and bathrooms are highly correlated
+- More rooms usually means more bathrooms
+- They're not independent directions!
+
+**Root cause:** Features contain overlapping information - they're not orthogonal!
+
+### So How Does PCA Fix This?
+
+**PCA's brilliant insight:**
+
+**Question to yourself:** "What if I could find NEW features that are:
+1. Orthogonal (no overlap/redundancy)
+2. Ordered by importance (first captures most variation)
+3. Fewer in number (only keep important ones)"
+
+**That's exactly what PCA does!**
+
+**Process:**
+1. Find the direction where data varies the MOST → Principal Component 1 (PC1)
+2. Find the direction (orthogonal to PC1) where data varies second-most → PC2
+3. Continue finding orthogonal directions...
+4. Keep only the top k components that capture 95% of variance
+5. Throw away the rest!
+
+### Connecting to Our Linear Algebra Concepts
+
+**PCA uses EVERYTHING we've learned:**
+
+1. **Linear Independence:** PCA finds independent directions
+2. **Basis:** PCs form a new basis for the data
+3. **Orthogonality:** All PCs are orthogonal to each other
+4. **Gram-Schmidt:** Used to ensure PCs are orthogonal
+5. **Projection:** Project data onto the PC subspace
+
+**Beautiful! All concepts come together!**
+
+### Step-by-Step: How PCA Works
+
+**Given:** Data matrix X (n samples × d features)
+
+**Step 1: Center the data**
+- Subtract mean from each feature
+- Now data is centered at origin
+- **Why?** We want directions through origin (subspaces!)
+
+**Step 2: Compute covariance matrix**
+- C = (1/n)X^T X
+- Measures how features vary together
+- **Size:** d × d
+
+**Step 3: Find eigenvectors of C**
+- These are the principal components!
+- Each eigenvector is a direction
+- Eigenvalue = variance in that direction
+
+**Step 4: Sort by eigenvalue**
+- Largest eigenvalue → most important direction (PC1)
+- Second largest → PC2
+- And so on...
+
+**Step 5: Create transformation matrix**
+- W = [PC1 | PC2 | ... | PCk]
+- Columns are top k eigenvectors
+- **These form an orthonormal basis!**
+
+**Step 6: Transform data**
+- Z = XW
+- Projects data onto new k-dimensional subspace
+- **Dimensionality reduced: d → k!**
+
+### Detailed Example 6.1: PCA on Simple Data
+
+**Dataset:** Student performance (4 students, 3 test scores)
+
+```
+        Math  Physics  Chemistry
+Student 1:  90     85       88
+Student 2:  70     68       72
+Student 3:  80     78       81
+Student 4:  60     58       62
+```
+
+**Matrix form:**
+```
+X = [90  85  88]
+    [70  68  72]
+    [80  78  81]
+    [60  58  62]
+```
+
+**Observation:** Scores are highly correlated!
+- Good at Math → probably good at Physics too
+- Math and Physics scores move together
+
+**Question:** Can we capture this with fewer dimensions?
+
+**Step 1: Center the data**
+
+Mean: (75, 72.25, 75.75)
+
+```
+X_centered = [15   12.75  12.25]
+             [-5   -4.25  -3.75]
+             [5    5.75   5.25]
+             [-15  -14.25 -13.75]
+```
+
+**Step 2: Covariance matrix (simplified calculation)**
+
+After computing C = (1/n)X_centered^T X_centered:
+
+```
+C ≈ [133.3  128.4  127.5]
+    [128.4  124.2  123.1]
+    [127.5  123.1  122.2]
+```
+
+**Notice:** All values are large and similar!
+- High covariance → strong correlation
+- Features are not independent!
+
+**Step 3: Find eigenvectors (principal components)**
+
+After eigendecomposition:
+
+**PC1** ≈ [0.577, 0.578, 0.576] (nearly equal weights)
+**Eigenvalue₁** ≈ 379.7
+
+**PC2** ≈ [0.707, -0.707, 0.000] (contrast Math vs Physics)
+**Eigenvalue₂** ≈ 0.5
+
+**PC3** ≈ [0.408, 0.408, -0.816] (contrast Math+Physics vs Chemistry)  
+**Eigenvalue₃** ≈ 0.3
+
+**Interpretation:**
+
+**PC1 (explains 99.7% of variance!):**
+- All three subjects contribute equally
+- **Represents "overall ability"**
+- This ONE direction captures almost everything!
+
+**PC2 (explains 0.1% of variance):**
+- Contrast between Math and Physics
+- Almost no variation here
+- Students good at Math → good at Physics
+
+**PC3 (explains 0.08% of variance):**
+- Tiny variation
+- Can ignore!
+
+**Step 4: Dimensionality reduction**
+
+**Keep only PC1!** It captures 99.7% of variance.
+
+**Transform to 1D:**
+```
+Student 1: 15×0.577 + 12.75×0.578 + 12.25×0.576 ≈ 23.4
+Student 2: -5×0.577 + (-4.25)×0.578 + (-3.75)×0.576 ≈ -7.7
+Student 3: 5×0.577 + 5.75×0.578 + 5.25×0.576 ≈ 9.2
+Student 4: -15×0.577 + (-14.25)×0.578 + (-13.75)×0.576 ≈ -24.9
+```
+
+**Result:** Reduced from 3 dimensions to 1 dimension!
+
+**Lost only 0.3% of information!**
+
+**New feature (PC1 score):** Represents overall academic ability
+
+### Why PCA Uses Orthogonal Components
+
+**Question to yourself:** "Why not just use ANY directions that explain variance?"
+
+**Problem without orthogonality:**
+- Directions might overlap (redundancy again!)
+- Can't tell which direction contributes what
+- Lose interpretability
+
+**With orthogonal components:**
+- Each PC captures INDEPENDENT variation
+- No overlap between components
+- Can analyze contribution of each separately
+- Clean, interpretable decomposition
+
+**This is why Gram-Schmidt matters!** Ensures orthogonality in numerical implementations.
+
+## Application 2: Least Squares Regression
+
+### What Problem Does Regression Solve?
+
+**Scenario:** Predicting house prices
+
+**You have:**
+- Features: area, bedrooms, age → vector **x**
+- Target: price → value y
+
+**Goal:** Find relationship y = **w**^T**x** + b
+
+**Problem:** Given n data points, find best **w**!
+
+**This is regression!**
+
+### The Root Cause: Data Doesn't Fit Perfectly
+
+**Reality:** No perfect line fits all points
+
+```
+Price
+  ^
+  |    x     x
+  |  x    x
+  | x  x      (scattered points)
+  |x    
+  +-----------> Area
+```
+
+**Question:** What's the "best" line?
+
+**Answer:** The line that minimizes errors!
+
+### Geometric Interpretation: Orthogonal Projection!
+
+**Here's where linear algebra becomes beautiful:**
+
+**Setup:**
+- Data matrix X (n × d): each row is a data point
+- Target vector **y** (n × 1): actual prices
+- Predicted: **ŷ** = X**w**
+
+**Question:** What values can **ŷ** take?
+
+**Answer:** All vectors in column space of X!
+- **ŷ** = X**w** for some **w**
+- This is span of columns of X
+- It's a subspace!
+
+**But:** Actual **y** might NOT be in this subspace!
+
+```
+        y (actual)
+       /|
+      / |
+     /  | ← error (residual)
+    /   |
+   ŷ____| ← closest point in column space
+   
+   (column space of X - a subspace)
+```
+
+**Question:** How do we find the closest point **ŷ** in the subspace to **y**?
+
+**Answer:** ORTHOGONAL PROJECTION!
+
+**The best prediction is the orthogonal projection of y onto the column space of X!**
+
+### Why Orthogonal Projection Minimizes Error
+
+**Residual (error):** **e** = **y** - **ŷ**
+
+**For orthogonal projection:**
+- **e** is perpendicular to column space
+- **e** is perpendicular to ALL columns of X
+- This means: X^T**e** = 0
+
+**This gives us the famous normal equation:**
+
+X^T(**y** - X**w**) = 0
+X^TX**w** = X^T**y**
+**w** = (X^TX)^(-1)X^T**y**
+
+**Beautiful! The best fit is where residuals are orthogonal to the feature space!**
+
+### Example 6.2: Linear Regression
+
+**Data:** Predicting test score from hours studied
+
+```
+Hours (x): [1, 2, 3, 4]
+Score (y): [2, 3, 5, 6]
+```
+
+**Model:** y = wx + b
+
+**In matrix form:**
+```
+X = [1  1]    y = [2]
+    [1  2]        [3]
+    [1  3]        [5]
+    [1  4]        [6]
+```
+(First column for bias term)
+
+**Normal equation:** (X^TX)**w** = X^T**y**
+
+**Calculate X^TX:**
+```
+X^TX = [1 1 1 1] [1  1]   = [4  10]
+       [1 2 3 4] [1  2]     [10 30]
+                 [1  3]
+                 [1  4]
+```
+
+**Calculate X^Ty:**
+```
+X^Ty = [1 1 1 1] [2]   = [16]
+       [1 2 3 4] [3]     [44]
+                 [5]
+                 [6]
+```
+
+**Solve:**
+```
+[4  10] [b]   = [16]
+[10 30] [w]     [44]
+```
+
+From first equation: 4b + 10w = 16 → b = 4 - 2.5w
+Substitute into second: 10(4 - 2.5w) + 30w = 44
+40 - 25w + 30w = 44
+5w = 4
+w = 0.8
+
+Then: b = 4 - 2.5(0.8) = 4 - 2 = 2
+
+**Solution:** y = 0.8x + 2
+
+**Predictions:**
+- x=1: ŷ=2.8 (actual: 2)
+- x=2: ŷ=3.6 (actual: 3)  
+- x=3: ŷ=4.4 (actual: 5)
+- x=4: ŷ=5.2 (actual: 6)
+
+**Residuals:** [-0.8, -0.6, 0.6, 0.8]
+
+**Verify orthogonality:** X^T**e** should be near zero ✓
+
+### When Does X^TX Fail to be Invertible?
+
+**Question:** What if (X^TX) is not invertible?
+
+**This happens when:** Columns of X are linearly dependent!
+
+**Example:** Features are [area in sq ft, area in sq meters]
+- Second is just 0.0929 × first
+- Dependent features!
+- X^TX is singular
+- Can't solve uniquely
+
+**Solution:** Remove dependent features!
+
+**This is why linear independence matters in ML!**
+
+## Application 3: Feature Orthogonalization
+
+### The Multicollinearity Problem
+
+**Scenario:** Predicting salary with:
+- Years of experience
+- Age  
+- Years since degree
+
+**Problem:** These are highly correlated!
+- More experience → older
+- More experience → longer since degree
+- Not independent features!
+
+**Consequences:**
+1. **Unstable coefficients:** Small data changes → huge coefficient changes
+2. **Hard to interpret:** Can't tell which feature matters
+3. **Numerical issues:** Matrix inversion breaks down
+4. **Inflated variance:** Coefficient estimates unreliable
+
+**Root cause:** Features share information - they're not orthogonal!
+
+### How Orthogonalization Helps
+
+**Idea:** Transform features to be orthogonal!
+
+**Method:** Apply Gram-Schmidt to feature vectors!
+
+**Process:**
+1. Keep first feature as is: **u₁** = **x₁**
+2. Remove **x₁** component from **x₂**: **u₂** = **x₂** - proj**ᵤ₁**(**x₂**)
+3. Remove **u₁**, **u₂** components from **x₃**: **u₃** = **x₃** - proj**ᵤ₁**(**x₃**) - proj**ᵤ₂**(**x₃**)
+
+**Result:** New features {**u₁, u₂, u₃**} are orthogonal!
+
+**Benefits:**
+- Each feature adds unique information
+- Stable coefficients
+- Clear interpretation
+- Better numerical properties
+
+### Example 6.3: Orthogonalizing Correlated Features
+
+**Dataset:** 4 houses
+
+```
+Feature 1 (Area):      [1000, 1500, 2000, 2500]
+Feature 2 (Rooms):     [2, 3, 4, 5]
+```
+
+**Check correlation:**
+
+Mean-centered:
+```
+x₁ = [-750, -250, 250, 750]
+x₂ = [-1.5, -0.5, 0.5, 1.5]
+```
+
+**x₁ · x₂** = (-750)(-1.5) + (-250)(-0.5) + (250)(0.5) + (750)(1.5)
+           = 1125 + 125 + 125 + 1125 = 2500
+
+**Highly correlated!** (Large dot product)
+
+**Orthogonalize:**
+
+**u₁** = **x₁** = [-750, -250, 250, 750]
+
+proj**ᵤ₁**(**x₂**) = (2500 / 1,562,500) × **x₁** = 0.0016 × **x₁**
+
+**u₂** = **x₂** - proj**ᵤ₁**(**x₂**) 
+      ≈ **x₂** - [−1.2, -0.4, 0.4, 1.2]
+      ≈ [-0.3, -0.1, 0.1, 0.3]
+
+**Verify:** **u₁ · u₂** ≈ 0 ✓
+
+**Interpretation:**
+- **u₁:** Overall size (area)
+- **u₂:** Room density (rooms per area), independent of size
+
+**Now:** Each feature captures unique information!
+
+## Application 4: Singular Value Decomposition (SVD)
+
+### What is SVD?
+
+**Any matrix A (m × n) can be decomposed as:**
+
+A = UΣV^T
+
+where:
+- **U** (m × m): Orthonormal basis for column space
+- **Σ** (m × n): Diagonal with singular values
+- **V** (n × n): Orthonormal basis for row space
+
+**This is like PCA on steroids!**
+
+### How SVD Uses Our Concepts
+
+**SVD combines everything:**
+
+1. **Orthonormal bases:** U and V have orthonormal columns
+2. **Gram-Schmidt:** Used to compute U and V
+3. **Eigenvalues/vectors:** Related to singular values
+4. **Dimensionality reduction:** Keep only large singular values
+5. **Linear independence:** SVD reveals rank (number of independent columns)
+
+### Applications of SVD
+
+**1. Image Compression**
+
+**Original image:** 1000 × 1000 matrix = 1,000,000 values
+
+**Apply SVD:** A = UΣV^T
+
+**Key insight:** Only first k singular values are large!
+
+**Keep only top k:** A ≈ U_k Σ_k V_k^T
+
+**Storage:** k(1000 + 1 + 1000) instead of 1,000,000
+- If k=100: Need 200,100 instead of 1,000,000
+- 80% compression with minimal quality loss!
+
+**Why it works:** Most singular values are tiny - image has redundancy!
+
+**2. Recommender Systems**
+
+**Matrix:** Users × Movies
+
+**Problem:** Sparse! (Most entries missing)
+
+**SVD gives:**
+- User features (from U)
+- Movie features (from V)  
+- Predict missing ratings!
+
+**Example:** Netflix prize winner used SVD-based methods
+
+**3. Natural Language Processing**
+
+**Term-document matrix:** Words × Documents
+
+**SVD finds:**
+- Latent topics (from Σ)
+- Word-topic relationships (from U)
+- Document-topic relationships (from V)
+
+**This is Latent Semantic Analysis (LSA)!**
+
+### Example 6.4: SVD for Image Compression
+
+**Small image (4×4):**
+```
+A = [8  7  6  5]
+    [7  6  5  4]
+    [6  5  4  3]
+    [5  4  3  2]
+```
+
+**Apply SVD:** A = UΣV^T
+
+**Singular values (diagonal of Σ):**
+σ₁ ≈ 18.37 (very large!)
+σ₂ ≈ 0.54 (tiny)
+σ₃ ≈ 0.00 (negligible)
+σ₄ ≈ 0.00 (negligible)
+
+**Observation:** First singular value dominates!
+
+**Rank-1 approximation:** Keep only σ₁
+
+```
+A₁ = σ₁ u₁ v₁^T ≈ [7.9  6.9  5.9  4.9]
+                   [6.9  6.0  5.1  4.1]
+                   [5.9  5.1  4.3  3.4]
+                   [4.9  4.1  3.4  2.6]
+```
+
+**Error:** Very small! (Most values within 0.1 of original)
+
+**Compression:** 
+- Original: 16 values
+- Compressed: 4 (u₁) + 1 (σ₁) + 4 (v₁) = 9 values
+- 44% reduction!
+
+## Application 5: Neural Network Weight Initialization
+
+### Why Orthogonal Initialization?
+
+**Problem:** Training deep neural networks
+
+**Challenge:** Gradients vanish or explode
+- Too small → no learning
+- Too large → instability
+
+**Question:** How should we initialize weights?
+
+**Answer:** Use orthogonal matrices!
+
+### Why Orthogonality Helps
+
+**Orthogonal matrices preserve norms:**
+
+If Q is orthogonal: ||Q**x**|| = ||**x**||
+
+**This means:**
+- No explosion (can't make signals bigger)
+- No vanishing (can't make signals smaller)
+- Stable gradient flow!
+
+**How to create:** Use Gram-Schmidt on random vectors!
+
+### Example: Initializing a Layer
+
+**Layer:** 100 neurons → 100 neurons
+
+**Weight matrix:** 100 × 100
+
+**Random initialization:**
+```python
+W = random_matrix(100, 100)
+# Apply Gram-Schmidt to columns
+Q = gram_schmidt(W)
+# Q is now orthogonal!
+```
+
+**Benefits:**
+- Signals preserve magnitude through layer
+- Gradients flow smoothly
+- Faster convergence
+- Better final performance
+
+**This is called "orthogonal initialization"!**
+
+## Application 6: Independent Component Analysis (ICA)
+
+### The Cocktail Party Problem
+
+**Scenario:** Recording a party
+
+**You have:** 3 microphones
+**Recording:** Mix of 3 people talking
+
+```
+Mic 1: 0.7×person1 + 0.2×person2 + 0.1×person3
+Mic 2: 0.1×person1 + 0.8×person2 + 0.1×person3  
+Mic 3: 0.2×person1 + 0.1×person2 + 0.7×person3
+```
+
+**Goal:** Separate individual voices!
+
+**This is ICA's job!**
+
+### How ICA Relates to Linear Independence
+
+**Key assumption:** Original sources are independent
+- Person 1's speech independent of Person 2's
+- Statistically independent signals
+
+**ICA finds:** Transformation that makes signals independent
+- Like finding independent basis vectors
+- But using statistical independence, not just orthogonality
+
+**Difference from PCA:**
+- PCA: Finds orthogonal directions (geometric independence)
+- ICA: Finds statistically independent sources (probabilistic independence)
+
+**Both use:** Linear algebra concepts we've learned!
+
+## Application 7: Dimensionality of Embeddings
+
+### Word Embeddings in NLP
+
+**Problem:** Representing words for machine learning
+
+**Naive approach:** One-hot encoding
+- Vocabulary: 50,000 words
+- Each word: 50,000-dimensional vector (49,999 zeros, one 1)
+- Huge! Sparse! No relationships captured!
+
+**Better approach:** Word embeddings
+- Each word: dense vector in 300 dimensions
+- Similar words have similar vectors
+- Captures semantic relationships
+
+**Question:** Why 300 dimensions? Why not 50,000?
+
+**Answer:** The true "dimensionality" of word meanings is much lower!
+- Actual semantic space has much lower dimension
+- Words lie in lower-dimensional manifold
+- 300 dimensions capture essence
+
+**This uses concepts of:**
+- Basis and dimension
+- Dimensionality reduction
+- Linear independence of semantic directions
+
+### Example: Word Relationships
+
+**Classic example:**
+
+king - man + woman ≈ queen
+
+**In vector space:**
+```
+v(king) - v(man) + v(woman) ≈ v(queen)
+```
+
+**This works because:**
+- "Royalty" dimension
+- "Gender" dimension  
+- These are roughly orthogonal directions!
+
+**The embedding captures independent semantic dimensions!**
+
+## Summary: Why Linear Algebra Powers ML
+
+**Let's step back and see the big picture:**
+
+**Question:** Why does all this abstract math appear everywhere in machine learning?
+
+**Answer:** Data is fundamentally about relationships and structure!
+
+**Linear algebra provides:**
+
+1. **Language for relationships**
+   - Dot products measure similarity
+   - Projections find closest representations
+   - Orthogonality means independence
+
+2. **Tools for dimensionality**
+   - Find true dimension of data (PCA)
+   - Reduce computational cost
+   - Reveal hidden structure
+
+3. **Geometric intuition**
+   - Data lives in high-dimensional spaces
+   - We visualize using subspaces
+   - Projections, distances, angles all matter
+
+4. **Computational efficiency**
+   - Matrix operations are fast
+   - Orthogonal transformations stable
+   - Vectorization accelerates processing
+
+5. **Theoretical foundations**
+   - Uniqueness of solutions (linear independence)
+   - Optimal approximations (projections)
+   - Guaranteed convergence (orthogonality)
+
+**Every concept we learned has direct applications:**
+
+| Concept | ML Application |
+|---------|---------------|
+| Linear Independence | Feature selection, detecting redundancy |
+| Span | Representing data, understanding capacity |
+| Basis | Coordinate systems, embeddings |
+| Dimension | Complexity, capacity, compression |
+| Orthogonality | Decorrelation, independence |
+| Gram-Schmidt | QR decomposition, orthogonal initialization |
+| Projection | Regression, PCA, nearest neighbors |
+| Orthonormal bases | Fast computations, stability |
+
+**The beauty:** Simple geometric ideas scale to millions of dimensions!
+
+## Practice Problems - Applications
+
+**Problem 6.1: PCA by Hand**
+
+Dataset (3 students, 2 tests):
+```
+Math: [90, 60, 75]
+Physics: [85, 58, 72]
+```
+
+a) Center the data
+b) Compute covariance matrix
+c) Find principal components (eigenvectors)
+d) What % variance does PC1 explain?
+e) Reduce to 1D using PC1
+
+**Problem 6.2: Regression Geometry**
+
+Data: x = [1, 2, 3], y = [2, 3, 5]
+
+a) Form X matrix (include bias column)
+b) Solve normal equation
+c) Compute residuals
+d) Verify X^T e = 0 (orthogonality)
+e) Geometric interpretation: where does ŷ live?
+
+**Problem 6.3: Feature Orthogonalization**
+
+Features (4 samples):
+```
+x₁ = [1, 2, 3, 4]
+x₂ = [2, 4, 6, 8] 
+```
+
+a) Why is this problematic?
+b) Apply Gram-Schmidt
+c) Interpret new features
+d) Verify orthogonality
+
+**Problem 6.4: SVD Compression**
+
+Matrix:
+```
+A = [4  4]
+    [4  4]
+    [2  2]
+```
+
+a) What's the rank?
+b) Apply SVD (or describe expected result)
+c) How many singular values are non-zero?
+d) Compress using rank-1 approximation
+e) What's the error?
+
+**Problem 6.5: Multicollinearity Detection**
+
+You have features: [age, experience, years_since_degree]
+
+a) Why might these be dependent?
+b) How would you check mathematically?
+c) What problems does this cause in regression?
+d) Propose solution using concepts from this chapter
+
+**Problem 6.6: PCA Interpretation**
+
+After PCA on image dataset:
+- PC1: [0.3, 0.3, 0.4, ...] (300 pixel weights)
+- Explains 60% variance
+- All weights positive
+
+a) What might PC1 represent? (Hint: brightness?)
+b) If PC2 has positive and negative weights?
+c) Why do we need fewer PCs than original dimensions?
+
+**Problem 6.7: Orthogonal Initialization**
+
+Neural network layer: 50 input → 50 output neurons
+
+a) Size of weight matrix?
+b) Why initialize with orthogonal matrix?
+c) How does this help gradient flow?
+d) How to create orthogonal matrix? (Use Gram-Schmidt!)
+
+**Problem 6.8: ICA vs PCA**
+
+Audio signals: Mix of 2 independent sources
+
+a) Would PCA separate the sources? Why/why not?
+b) What's different about ICA?
+c) Both find basis vectors - what's different about the bases?
+
+**Problem 6.9: Embeddings**
+
+Word embeddings: 50,000 words, 300 dimensions
+
+a) Why not use 50,000 dimensions?
+b) What determines actual dimensionality needed?
+c) If "king - man + woman = queen" works, what does this say about the basis?
+
+**Problem 6.10: Bringing It All Together**
+
+You're building a recommender system:
+- User-item matrix: 10,000 users × 5,000 movies
+- Mostly empty (sparse)
+- Want to predict missing ratings
+
+a) What's wrong with using the data directly? (Dimensionality!)
+b) How could PCA/SVD help?
+c) What do the singular vectors represent?
+d) How many dimensions do you really need? (Much less!)
+e) Connect to concepts: basis, dimension, orthogonality
+
+---
+
+**End of Section 5.6: Applications to Machine Learning**
+
+**Key takeaways:**
+- ✅ PCA finds orthogonal directions of maximum variance
+- ✅ Regression is orthogonal projection onto feature space
+- ✅ Feature orthogonalization removes multicollinearity
+- ✅ SVD provides low-rank approximations for compression
+- ✅ Orthogonal initialization stabilizes neural network training
+- ✅ ICA finds statistically independent components
+- ✅ Embeddings capture true dimensionality of semantic spaces
+- ✅ All concepts (independence, basis, orthogonality) are fundamental to ML
+
+**Next: Section 5.7 - Comprehensive Practice Problems**
+
+# Chapter 5: Section 5 - Gram-Schmidt Process
+
+<a name="gram-schmidt"></a>
+# 5. Gram-Schmidt Process
+
+## The Core Question: How Do We Build Perpendicular Directions?
+
+Imagine you're in a dark room trying to understand its shape. You have a flashlight.
+
+**Your strategy:**
+- First, shine the light straight ahead → that's one direction
+- Next, you want to explore a NEW direction, but it should be completely different from the first
+- Then another direction that's different from both previous ones
+- And so on...
+
+**Question:** How do you ensure each new direction is truly "different" (perpendicular) from all previous ones?
+
+**Problem without perpendicular directions:**
+If your second direction partially overlaps with the first, you're wasting effort exploring areas you've already seen!
+
+**Solution:** Remove the "overlap" before exploring the new direction!
+
+**This is exactly what the Gram-Schmidt process does!**
+
+## What Problem Does Gram-Schmidt Solve?
+
+**The Problem We Face:**
+
+You have a set of linearly independent vectors: **{v₁, v₂, v₃, ..., vₖ}**
+
+But they're NOT orthogonal - they point in "messy" directions with overlap.
+
+**What we want:**
+- Keep the same span (reach the same space)
+- But use orthogonal vectors instead
+- Even better: orthonormal vectors!
+
+**Why do we want this?**
+- Easier calculations (as we saw in Section 4)
+- Numerical stability in computers
+- Clearer geometric understanding
+- Foundation for many ML algorithms
+
+**Real-world analogy:**
+- **Before:** You have k crooked, overlapping rulers
+- **After:** You have k perfectly perpendicular rulers measuring the same space
+- Same space covered, but much cleaner system!
+
+## The Root Cause: Why Are Vectors Not Orthogonal?
+
+**Let's think about what "not orthogonal" means:**
+
+Take two vectors **v₁** and **v₂** where **v₁ · v₂ ≠ 0**
+
+**Question:** Why is their dot product non-zero?
+
+**Answer:** Because **v₂** has a component in the direction of **v₁**!
+
+**Geometric picture:**
+```
+        v₂
+       /
+      /
+     /______ projection of v₂ onto v₁
+    /
+   v₁
+```
+
+**The projection of v₂ onto v₁** is the "overlap" - the part of **v₂** that goes in the same direction as **v₁**.
+
+**Root cause:** This overlap makes them non-orthogonal!
+
+## So How Can We Remove This Overlap?
+
+**Natural question:** If the overlap is the problem, can we just... remove it?
+
+**Yes! That's the brilliant insight!**
+
+**If we have:**
+- **v₂** = (part parallel to **v₁**) + (part perpendicular to **v₁**)
+
+**Then we can isolate the perpendicular part:**
+- Perpendicular part = **v₂** - (part parallel to **v₁**)
+- Perpendicular part = **v₂** - proj**ᵥ₁**(**v₂**)
+
+**This perpendicular part is orthogonal to v₁!**
+
+**Let's verify:**
+- Let **w₂** = **v₂** - proj**ᵥ₁**(**v₂**)
+- **w₂ · v₁** = (**v₂** - proj**ᵥ₁**(**v₂**)) · **v₁**
+- = **v₂ · v₁** - proj**ᵥ₁**(**v₂**) · **v₁**
+
+Now, proj**ᵥ₁**(**v₂**) = ((**v₂ · v₁**) / ||**v₁**||²)**v₁**
+
+So: proj**ᵥ₁**(**v₂**) · **v₁** = ((**v₂ · v₁**) / ||**v₁**||²) **v₁ · v₁**
+                                  = ((**v₂ · v₁**) / ||**v₁**||²) ||**v₁**||²
+                                  = **v₂ · v₁**
+
+Therefore: **w₂ · v₁** = **v₂ · v₁** - **v₂ · v₁** = 0 ✓
+
+**Beautiful! The overlap is removed!**
+
+## The Gram-Schmidt Process: Step by Step
+
+**Goal:** Convert linearly independent set {**v₁, v₂, ..., vₖ**} into orthogonal set {**u₁, u₂, ..., uₖ**}
+
+**The algorithm:**
+
+**Step 1:** Keep the first vector as is
+- **u₁** = **v₁**
+- (Nothing to make it orthogonal to yet!)
+
+**Step 2:** Make **v₂** orthogonal to **u₁**
+- **u₂** = **v₂** - proj**ᵤ₁**(**v₂**)
+- Remove the component of **v₂** in the direction of **u₁**
+
+**Step 3:** Make **v₃** orthogonal to BOTH **u₁** AND **u₂**
+- **u₃** = **v₃** - proj**ᵤ₁**(**v₃**) - proj**ᵤ₂**(**v₃**)
+- Remove components in both previous directions
+
+**Step 4:** Continue this pattern...
+- **u₄** = **v₄** - proj**ᵤ₁**(**v₄**) - proj**ᵤ₂**(**v₄**) - proj**ᵤ₃**(**v₄**)
+
+**General step i:**
+- **uᵢ** = **vᵢ** - Σⱼ₌₁^(i-1) proj**ᵤⱼ**(**vᵢ**)
+- Remove ALL overlaps with previous orthogonal vectors
+
+**Optional final step:** Normalize to get orthonormal
+- **q₁** = **u₁** / ||**u₁**||
+- **q₂** = **u₂** / ||**u₂**||
+- etc.
+
+## Why Does This Work?
+
+**Let's think through why each new vector is orthogonal to all previous ones:**
+
+**After Step 2:** Is **u₂ ⊥ u₁**?
+- Yes! We specifically removed the **u₁** component from **v₂**
+
+**After Step 3:** Is **u₃ ⊥ u₁** and **u₃ ⊥ u₂**?
+- We removed BOTH the **u₁** component AND the **u₂** component from **v₃**
+- So **u₃** is perpendicular to both!
+
+**The pattern continues:** Each new vector has ALL previous components removed, so it's perpendicular to ALL previous vectors.
+
+**Key insight:** By systematically removing overlaps, we build perpendicular directions one at a time!
+
+## Detailed Example 5.1: Gram-Schmidt in ℝ²
+
+**Given vectors:**
+- **v₁** = (3, 1)
+- **v₂** = (2, 2)
+
+**Goal:** Create orthogonal set {**u₁, u₂**}
+
+### Step 1: First vector
+
+**u₁** = **v₁** = (3, 1)
+
+### Step 2: Make v₂ orthogonal to u₁
+
+**Calculate projection of v₂ onto u₁:**
+
+proj**ᵤ₁**(**v₂**) = ((**v₂ · u₁**) / ||**u₁**||²) **u₁**
+
+**v₂ · u₁** = (2)(3) + (2)(1) = 6 + 2 = 8
+
+||**u₁**||² = 3² + 1² = 9 + 1 = 10
+
+proj**ᵤ₁**(**v₂**) = (8/10)(3, 1) = (4/5)(3, 1) = (12/5, 4/5)
+
+**Remove the overlap:**
+
+**u₂** = **v₂** - proj**ᵤ₁**(**v₂**)
+      = (2, 2) - (12/5, 4/5)
+      = (10/5 - 12/5, 10/5 - 4/5)
+      = (-2/5, 6/5)
+
+### Verify orthogonality:
+
+**u₁ · u₂** = (3)(-2/5) + (1)(6/5) = -6/5 + 6/5 = 0 ✓
+
+**Perfect! They're orthogonal!**
+
+### Geometric interpretation:
+
+**Before:** **v₁** and **v₂** pointed in somewhat similar directions (not perpendicular)
+
+**After:** **u₁** and **u₂** are exactly perpendicular
+
+**Same span:** span{**v₁, v₂**} = span{**u₁, u₂**} = all of ℝ²
+
+### Optional: Create orthonormal basis
+
+**Normalize u₁:**
+
+||**u₁**|| = √(9 + 1) = √10
+
+**q₁** = (3, 1) / √10 = (3/√10, 1/√10)
+
+**Normalize u₂:**
+
+||**u₂**|| = √(4/25 + 36/25) = √(40/25) = √(8/5) = 2√(2/5) = 2/√5
+
+**q₂** = (-2/5, 6/5) / (2/√5) = (-2/5, 6/5) × (√5/2) = (-√5/5, 3√5/5)
+
+**Verify orthonormal:**
+- **q₁ · q₂** = (3/√10)(-√5/5) + (1/√10)(3√5/5) = -3√5/(5√10) + 3√5/(5√10) = 0 ✓
+- ||**q₁**|| = 1 ✓
+- ||**q₂**|| = 1 ✓
+
+## Detailed Example 5.2: Gram-Schmidt in ℝ³
+
+**Given vectors:**
+- **v₁** = (1, 1, 0)
+- **v₂** = (1, 0, 1)  
+- **v₃** = (0, 1, 1)
+
+**Goal:** Create orthogonal set {**u₁, u₂, u₃**}
+
+### Step 1: First vector
+
+**u₁** = **v₁** = (1, 1, 0)
+
+### Step 2: Make v₂ orthogonal to u₁
+
+**Calculate projection:**
+
+**v₂ · u₁** = (1)(1) + (0)(1) + (1)(0) = 1
+
+||**u₁**||² = 1² + 1² + 0² = 2
+
+proj**ᵤ₁**(**v₂**) = (1/2)(1, 1, 0) = (1/2, 1/2, 0)
+
+**Remove overlap:**
+
+**u₂** = **v₂** - proj**ᵤ₁**(**v₂**)
+      = (1, 0, 1) - (1/2, 1/2, 0)
+      = (1/2, -1/2, 1)
+
+**Verify:** **u₁ · u₂** = (1)(1/2) + (1)(-1/2) + (0)(1) = 1/2 - 1/2 = 0 ✓
+
+### Step 3: Make v₃ orthogonal to BOTH u₁ and u₂
+
+**Calculate projection onto u₁:**
+
+**v₃ · u₁** = (0)(1) + (1)(1) + (1)(0) = 1
+
+proj**ᵤ₁**(**v₃**) = (1/2)(1, 1, 0) = (1/2, 1/2, 0)
+
+**Calculate projection onto u₂:**
+
+**v₃ · u₂** = (0)(1/2) + (1)(-1/2) + (1)(1) = 0 - 1/2 + 1 = 1/2
+
+||**u₂**||² = (1/2)² + (-1/2)² + 1² = 1/4 + 1/4 + 1 = 3/2
+
+proj**ᵤ₂**(**v₃**) = (1/2)/(3/2) × (1/2, -1/2, 1) = (1/3)(1/2, -1/2, 1) = (1/6, -1/6, 1/3)
+
+**Remove BOTH overlaps:**
+
+**u₃** = **v₃** - proj**ᵤ₁**(**v₃**) - proj**ᵤ₂**(**v₃**)
+      = (0, 1, 1) - (1/2, 1/2, 0) - (1/6, -1/6, 1/3)
+      = (0 - 1/2 - 1/6, 1 - 1/2 + 1/6, 1 - 0 - 1/3)
+      = (-3/6 - 1/6, 3/6 + 1/6, 3/3 - 1/3)
+      = (-4/6, 4/6, 2/3)
+      = (-2/3, 2/3, 2/3)
+
+### Verify orthogonality:
+
+**u₁ · u₃** = (1)(-2/3) + (1)(2/3) + (0)(2/3) = -2/3 + 2/3 = 0 ✓
+
+**u₂ · u₃** = (1/2)(-2/3) + (-1/2)(2/3) + (1)(2/3) = -1/3 - 1/3 + 2/3 = 0 ✓
+
+**Perfect! All three are mutually orthogonal!**
+
+### Result:
+
+**Orthogonal basis:** {(1, 1, 0), (1/2, -1/2, 1), (-2/3, 2/3, 2/3)}
+
+**These span the same space as the original vectors, but are perpendicular!**
+
+## The Pattern Behind Gram-Schmidt
+
+**Let's step back and see the beautiful pattern:**
+
+**Question to yourself:** "I have a new vector **vᵢ**. How do I make it orthogonal to all my previous orthogonal vectors **u₁, u₂, ..., uᵢ₋₁**?"
+
+**Answer:** "Remove the parts that overlap with each previous vector!"
+
+**How do we find these overlapping parts?** 
+- Use projections! proj**ᵤⱼ**(**vᵢ**) gives us the component of **vᵢ** in the direction of **uⱼ**
+
+**What's the root cause of non-orthogonality?**
+- The new vector **vᵢ** has components pointing in the same directions as previous vectors
+
+**How does Gram-Schmidt fix it?**
+- By systematically subtracting out ALL these overlapping components, leaving only the "new" direction
+
+**Why does this give us orthogonal vectors?**
+- After removing all components in previous directions, what's left MUST be perpendicular to all previous vectors!
+
+## Common Mistakes and How to Avoid Them
+
+### Mistake 1: Projecting onto original vectors instead of orthogonalized ones
+
+**Wrong:**
+```
+u₃ = v₃ - proj_v₁(v₃) - proj_v₂(v₃)  ❌
+```
+
+**Right:**
+```
+u₃ = v₃ - proj_u₁(v₃) - proj_u₂(v₃)  ✓
+```
+
+**Why it matters:** The **u** vectors are already orthogonal, but the **v** vectors are not! We must project onto the orthogonal vectors we've already created.
+
+### Mistake 2: Forgetting to include all previous projections
+
+**Wrong:**
+```
+u₃ = v₃ - proj_u₂(v₃)  ❌ (forgot u₁!)
+```
+
+**Right:**
+```
+u₃ = v₃ - proj_u₁(v₃) - proj_u₂(v₃)  ✓
+```
+
+**Why it matters:** We need to remove overlaps with ALL previous vectors, not just the most recent one!
+
+### Mistake 3: Using incorrect projection formula
+
+**Remember:** proj**ᵤ**(**v**) = ((**v · u**) / ||**u**||²) **u**
+
+**If u is already normalized (unit vector):**
+proj**ᵤ**(**v**) = (**v · u**) **u**  (simpler!)
+
+### Mistake 4: Not verifying orthogonality
+
+**Always check:** **uᵢ · uⱼ** = 0 for all i ≠ j
+
+If not zero, you made a calculation error!
+
+## Modified Gram-Schmidt (More Numerically Stable)
+
+**Classical Gram-Schmidt** (what we've shown):
+- Calculate all projections at once
+- **uᵢ** = **vᵢ** - Σⱼ₌₁^(i-1) proj**ᵤⱼ**(**vᵢ**)
+
+**Modified Gram-Schmidt** (better for computers):
+- Update vector after each projection
+- More stable when dealing with nearly-dependent vectors
+
+**Algorithm:**
+```
+u₁ = v₁
+
+For i = 2 to k:
+    uᵢ = vᵢ
+    For j = 1 to i-1:
+        uᵢ = uᵢ - proj_uⱼ(uᵢ)  // Update uᵢ immediately
+```
+
+**Why is this better?**
+- Reduces accumulation of rounding errors
+- Each subtraction uses the most up-to-date vector
+- More accurate when vectors are almost dependent
+
+**In practice:** Computers use Modified Gram-Schmidt for numerical stability
+
+## Applications in Machine Learning
+
+### 1. QR Decomposition
+
+**Any matrix A can be factored as:**
+
+A = QR
+
+where:
+- **Q** has orthonormal columns (from Gram-Schmidt!)
+- **R** is upper triangular
+
+**How Gram-Schmidt creates QR:**
+- Columns of A are our original vectors **v₁, v₂, ...**
+- Apply Gram-Schmidt → get orthogonal vectors **u₁, u₂, ...**
+- Normalize → get orthonormal vectors (columns of Q)
+- The coefficients used form R
+
+**Uses of QR:**
+- Solving least squares problems
+- Computing eigenvalues
+- Numerically stable matrix computations
+
+### 2. Orthogonalizing Features
+
+**Problem:** You have correlated features in your dataset
+
+**Example:**
+- Feature 1: House area
+- Feature 2: Number of rooms (highly correlated with area)
+
+**Solution:** Apply Gram-Schmidt!
+- Keep Feature 1 as is
+- Transform Feature 2 to be orthogonal to Feature 1
+- Now they capture independent information!
+
+**Benefits:**
+- Removes multicollinearity
+- Each feature adds unique information
+- Better for regression models
+
+### 3. Principal Component Analysis (PCA)
+
+**PCA finds orthogonal directions of maximum variance**
+
+**Connection to Gram-Schmidt:**
+- PCA computes eigenvectors of covariance matrix
+- These eigenvectors are orthogonal
+- If they weren't, we'd use Gram-Schmidt to make them so!
+- Gram-Schmidt ensures orthogonality in numerical implementations
+
+### 4. Conjugate Gradient Method
+
+**For solving large systems Ax = b:**
+- Creates sequence of search directions
+- These directions must be orthogonal (actually "conjugate")
+- Uses Gram-Schmidt-like process to ensure orthogonality
+- Much faster than standard methods for huge systems
+
+### 5. Signal Processing
+
+**Fourier transforms decompose signals into orthogonal components**
+
+**Why orthogonal basis matters:**
+- Each frequency component is independent
+- No interference between components
+- Easy to filter specific frequencies
+- Gram-Schmidt ensures clean separation
+
+## Example 5.3: Application to Data
+
+**Dataset:** 3 measurements from 4 experiments
+
+```
+v₁ = (1, 2, 1, 0) - Measurement 1
+v₂ = (1, 3, 1, 0) - Measurement 2  
+v₃ = (1, 2, 0, 1) - Measurement 3
+```
+
+**These are correlated! Let's orthogonalize them.**
+
+### Step 1: Keep v₁
+
+**u₁** = (1, 2, 1, 0)
+
+### Step 2: Orthogonalize v₂
+
+**v₂ · u₁** = 1 + 6 + 1 + 0 = 8
+||**u₁**||² = 1 + 4 + 1 + 0 = 6
+
+proj**ᵤ₁**(**v₂**) = (8/6)(1, 2, 1, 0) = (4/3, 8/3, 4/3, 0)
+
+**u₂** = (1, 3, 1, 0) - (4/3, 8/3, 4/3, 0) = (-1/3, 1/3, -1/3, 0)
+
+### Step 3: Orthogonalize v₃
+
+**v₃ · u₁** = 1 + 4 + 0 + 0 = 5
+proj**ᵤ₁**(**v₃**) = (5/6)(1, 2, 1, 0) = (5/6, 10/6, 5/6, 0)
+
+**v₃ · u₂** = -1/3 + 2/3 + 0 + 0 = 1/3
+||**u₂**||² = 1/9 + 1/9 + 1/9 + 0 = 3/9 = 1/3
+
+proj**ᵤ₂**(**v₃**) = (1/3)/(1/3) × (-1/3, 1/3, -1/3, 0) = (-1/3, 1/3, -1/3, 0)
+
+**u₃** = (1, 2, 0, 1) - (5/6, 10/6, 5/6, 0) - (-1/3, 1/3, -1/3, 0)
+      = (1 - 5/6 + 1/3, 2 - 10/6 - 1/3, 0 - 5/6 + 1/3, 1)
+      = (3/6, 1/6, -3/6, 1)
+      = (1/2, 1/6, -1/2, 1)
+
+### Result: Orthogonal features
+
+**New features:**
+- **u₁** = (1, 2, 1, 0) - Base measurement
+- **u₂** = (-1/3, 1/3, -1/3, 0) - Variation uncorrelated with u₁
+- **u₃** = (1/2, 1/6, -1/2, 1) - Variation uncorrelated with both
+
+**Each new feature captures independent information!**
+
+## Visualizing the Process
+
+**Think of Gram-Schmidt as building a coordinate system step by step:**
+
+**Step 1:** Place first axis along **v₁**
+```
+     v₁
+    ──────→ u₁
+```
+
+**Step 2:** Place second axis perpendicular to first
+```
+        ↑ u₂ (perpendicular)
+        |
+        |
+    ────┼───→ u₁
+        |
+```
+
+**Step 3:** Place third axis perpendicular to both
+```
+        ⊗ u₃ (coming out of page)
+        
+        ↑ u₂
+        |
+    ────┼───→ u₁
+```
+
+**At each step, we're building a perpendicular coordinate system!**
+
+## When Can Gram-Schmidt Fail?
+
+**Gram-Schmidt requires linearly independent input vectors.**
+
+**What happens if vectors are dependent?**
+
+**Example:**
+- **v₁** = (1, 0)
+- **v₂** = (2, 0) = 2**v₁**
+
+**Apply Gram-Schmidt:**
+- **u₁** = (1, 0)
+- **u₂** = **v₂** - proj**ᵤ₁**(**v₂**)
+        = (2, 0) - 2(1, 0)
+        = (0, 0)
+
+**We get the zero vector!**
+
+**This tells us:** **v₂** is completely in the direction of **v₁** - it adds no new information!
+
+**In practice:**
+- Check that ||**uᵢ**|| ≠ 0 at each step
+- If you get zero vector, original vectors were dependent
+- Remove the dependent vector and continue
+
+**Numerical issue:**
+- On computers, might get very small ||**uᵢ**|| instead of exactly zero
+- This indicates near-dependence
+- Modified Gram-Schmidt handles this better
+
+## Practice Problems - Gram-Schmidt
+
+**Problem 5.1: Basic Application**
+
+Apply Gram-Schmidt to create an orthogonal set:
+
+a) **v₁** = (1, 1), **v₂** = (1, -1)
+b) **v₁** = (1, 0, 0), **v₂** = (1, 1, 0)
+c) **v₁** = (1, 2), **v₂** = (2, 1)
+
+**Problem 5.2: Three Vectors in ℝ³**
+
+Apply Gram-Schmidt:
+
+**v₁** = (1, 0, 0)
+**v₂** = (1, 1, 0)  
+**v₃** = (1, 1, 1)
+
+a) Find orthogonal set {**u₁, u₂, u₃**}
+b) Verify all pairs are orthogonal
+c) Normalize to create orthonormal basis
+
+**Problem 5.3: Identifying Dependence**
+
+Apply Gram-Schmidt to:
+
+**v₁** = (1, 2, 3)
+**v₂** = (2, 4, 6)
+**v₃** = (1, 0, 0)
+
+a) What happens when you process **v₂**?
+b) Why does this happen?
+c) Which vectors should you keep?
+
+**Problem 5.4: QR Decomposition**
+
+Matrix A has columns:
+**v₁** = (1, 1, 0)
+**v₂** = (0, 1, 1)
+
+a) Apply Gram-Schmidt to get orthonormal columns (matrix Q)
+b) Express original vectors in terms of orthonormal ones
+c) What is R in the QR factorization?
+
+**Problem 5.5: Orthogonalizing Functions**
+
+Consider functions on [0, 1] with inner product ⟨f, g⟩ = ∫₀¹ f(x)g(x)dx
+
+Apply Gram-Schmidt to:
+- f₁(x) = 1
+- f₂(x) = x
+- f₃(x) = x²
+
+(These become Legendre polynomials!)
+
+**Problem 5.6: Application to Data**
+
+You have features:
+- **x₁** = (1, 2, 3, 4) - Age
+- **x₂** = (2, 3, 4, 5) - Experience ≈ Age + 1
+- **x₃** = (1, 1, 2, 2) - Education level
+
+a) Apply Gram-Schmidt to decorrelate features
+b) Interpret the new orthogonal features
+c) Which original feature is most "unique"?
+
+**Problem 5.7: Geometric Understanding**
+
+In ℝ², you have **v₁** = (3, 0) and **v₂** = (1, 1)
+
+a) Sketch both vectors
+b) Apply Gram-Schmidt - sketch resulting **u₁** and **u₂**
+c) Verify geometrically that they're perpendicular
+d) Do they span the same space as original?
+
+**Problem 5.8: Computational Challenge**
+
+Apply Gram-Schmidt to nearly-dependent vectors:
+
+**v₁** = (1, 0, 0)
+**v₂** = (1, 0.0001, 0)
+**v₃** = (0, 0, 1)
+
+a) What happens to ||**u₂**||?
+b) What does this indicate?
+c) Why is this problematic for computers?
+
+**Problem 5.9: Building from Scratch**
+
+You want an orthonormal basis for ℝ³ where first vector is (1, 1, 1).
+
+a) Normalize (1, 1, 1) → **q₁**
+b) Choose ANY vector not parallel to **q₁** → **v₂**
+c) Apply Gram-Schmidt to get **q₂**
+d) Choose ANY third vector → **v₃**
+e) Apply Gram-Schmidt to get **q₃**
+f) Verify you have orthonormal basis
+
+**Problem 5.10: Modified vs Classical**
+
+For **v₁** = (1, 1, 1), **v₂** = (1, 1, 0), **v₃** = (1, 0, 0):
+
+a) Apply classical Gram-Schmidt (all projections at once)
+b) Apply modified Gram-Schmidt (update after each projection)
+c) Are results identical?
+d) Which would be better if vectors were nearly dependent?
+
+---
+
+**End of Section 5.5: Gram-Schmidt Process**
+
+**Key takeaways:**
+- ✅ Gram-Schmidt converts any independent set to orthogonal set
+- ✅ Core idea: Remove overlaps (projections) systematically  
+- ✅ Build perpendicular directions one at a time
+- ✅ Results in same span, but orthogonal basis
+- ✅ Foundation for QR decomposition
+- ✅ Critical for numerical stability in computations
+- ✅ Modified version better for computers
+- ✅ Fails only when input vectors are dependent
+
+**Next: Section 5.6 - Applications to Machine Learning**
+
+---
+
+<a name="applications"></a>
+# 6. Applications to Machine Learning
+
+## The Core Question: Why Does All This Math Matter for AI?
+
+Imagine you're teaching a computer to recognize cats in photos.
+
+**You have:** 1 million photos, each 1000×1000 pixels = 1 million dimensions per photo!
+
+**Problem:** That's way too much data!
+- Takes forever to process
+- Needs massive memory
+- Most information is redundant (neighboring pixels are similar)
+
+**Question we should ask ourselves:** "Do we really need all 1 million dimensions? Or is there a smaller set of directions that captures most of the important information?"
+
+**This is where linear independence, basis, orthogonality, and Gram-Schmidt become crucial!**
+
+**Root cause of the problem:** High-dimensional data has lots of redundancy - many dimensions are not truly independent.
+
+**How can we solve this?** Find the fundamental, independent directions that capture the essence of the data!
+
+## Application 1: Principal Component Analysis (PCA)
+
+### What Problem Does PCA Solve?
+
+**Scenario:** You have a dataset with 100 features
+
+**Problems you face:**
+1. **Computational cost:** Processing 100 dimensions is slow
+2. **Visualization:** Can't plot 100-dimensional data
+3. **Overfitting:** Too many features, not enough data
+4. **Redundancy:** Many features are correlated (not independent!)
+
+**Question:** Can we represent the data using fewer dimensions without losing much information?
+
+**Answer:** Yes! Use PCA to find the most important directions!
+
+### The Root Cause: Redundancy in High Dimensions
+
+**Let's think about why data has redundancy:**
+
+**Example:** Predicting house prices with features:
+- Living area (sq ft)
+- Number of rooms
+- Lot size
+- Number of bathrooms
+- Total area (living + lot)
+
+**Notice:** Total area = Living area + Lot size (redundant!)
+
+**More subtle:** Number of rooms and bathrooms are highly correlated
+- More rooms usually means more bathrooms
+- They're not independent directions!
+
+**Root cause:** Features contain overlapping information - they're not orthogonal!
+
+### So How Does PCA Fix This?
+
+**PCA's brilliant insight:**
+
+**Question to yourself:** "What if I could find NEW features that are:
+1. Orthogonal (no overlap/redundancy)
+2. Ordered by importance (first captures most variation)
+3. Fewer in number (only keep important ones)"
+
+**That's exactly what PCA does!**
+
+**Process:**
+1. Find the direction where data varies the MOST → Principal Component 1 (PC1)
+2. Find the direction (orthogonal to PC1) where data varies second-most → PC2
+3. Continue finding orthogonal directions...
+4. Keep only the top k components that capture 95% of variance
+5. Throw away the rest!
+
+### Connecting to Our Linear Algebra Concepts
+
+**PCA uses EVERYTHING we've learned:**
+
+1. **Linear Independence:** PCA finds independent directions
+2. **Basis:** PCs form a new basis for the data
+3. **Orthogonality:** All PCs are orthogonal to each other
+4. **Gram-Schmidt:** Used to ensure PCs are orthogonal
+5. **Projection:** Project data onto the PC subspace
+
+**Beautiful! All concepts come together!**
+
+### Step-by-Step: How PCA Works
+
+**Given:** Data matrix X (n samples × d features)
+
+**Step 1: Center the data**
+- Subtract mean from each feature
+- Now data is centered at origin
+- **Why?** We want directions through origin (subspaces!)
+
+**Step 2: Compute covariance matrix**
+- C = (1/n)X^T X
+- Measures how features vary together
+- **Size:** d × d
+
+**Step 3: Find eigenvectors of C**
+- These are the principal components!
+- Each eigenvector is a direction
+- Eigenvalue = variance in that direction
+
+**Step 4: Sort by eigenvalue**
+- Largest eigenvalue → most important direction (PC1)
+- Second largest → PC2
+- And so on...
+
+**Step 5: Create transformation matrix**
+- W = [PC1 | PC2 | ... | PCk]
+- Columns are top k eigenvectors
+- **These form an orthonormal basis!**
+
+**Step 6: Transform data**
+- Z = XW
+- Projects data onto new k-dimensional subspace
+- **Dimensionality reduced: d → k!**
+
+### Detailed Example 6.1: PCA on Simple Data
+
+**Dataset:** Student performance (4 students, 3 test scores)
+
+```
+        Math  Physics  Chemistry
+Student 1:  90     85       88
+Student 2:  70     68       72
+Student 3:  80     78       81
+Student 4:  60     58       62
+```
+
+**Matrix form:**
+```
+X = [90  85  88]
+    [70  68  72]
+    [80  78  81]
+    [60  58  62]
+```
+
+**Observation:** Scores are highly correlated!
+- Good at Math → probably good at Physics too
+- Math and Physics scores move together
+
+**Question:** Can we capture this with fewer dimensions?
+
+**Step 1: Center the data**
+
+Mean: (75, 72.25, 75.75)
+
+```
+X_centered = [15   12.75  12.25]
+             [-5   -4.25  -3.75]
+             [5    5.75   5.25]
+             [-15  -14.25 -13.75]
+```
+
+**Step 2: Covariance matrix (simplified calculation)**
+
+After computing C = (1/n)X_centered^T X_centered:
+
+```
+C ≈ [133.3  128.4  127.5]
+    [128.4  124.2  123.1]
+    [127.5  123.1  122.2]
+```
+
+**Notice:** All values are large and similar!
+- High covariance → strong correlation
+- Features are not independent!
+
+**Step 3: Find eigenvectors (principal components)**
+
+After eigendecomposition:
+
+**PC1** ≈ [0.577, 0.578, 0.576] (nearly equal weights)
+**Eigenvalue₁** ≈ 379.7
+
+**PC2** ≈ [0.707, -0.707, 0.000] (contrast Math vs Physics)
+**Eigenvalue₂** ≈ 0.5
+
+**PC3** ≈ [0.408, 0.408, -0.816] (contrast Math+Physics vs Chemistry)  
+**Eigenvalue₃** ≈ 0.3
+
+**Interpretation:**
+
+**PC1 (explains 99.7% of variance!):**
+- All three subjects contribute equally
+- **Represents "overall ability"**
+- This ONE direction captures almost everything!
+
+**PC2 (explains 0.1% of variance):**
+- Contrast between Math and Physics
+- Almost no variation here
+- Students good at Math → good at Physics
+
+**PC3 (explains 0.08% of variance):**
+- Tiny variation
+- Can ignore!
+
+**Step 4: Dimensionality reduction**
+
+**Keep only PC1!** It captures 99.7% of variance.
+
+**Transform to 1D:**
+```
+Student 1: 15×0.577 + 12.75×0.578 + 12.25×0.576 ≈ 23.4
+Student 2: -5×0.577 + (-4.25)×0.578 + (-3.75)×0.576 ≈ -7.7
+Student 3: 5×0.577 + 5.75×0.578 + 5.25×0.576 ≈ 9.2
+Student 4: -15×0.577 + (-14.25)×0.578 + (-13.75)×0.576 ≈ -24.9
+```
+
+**Result:** Reduced from 3 dimensions to 1 dimension!
+
+**Lost only 0.3% of information!**
+
+**New feature (PC1 score):** Represents overall academic ability
+
+### Why PCA Uses Orthogonal Components
+
+**Question to yourself:** "Why not just use ANY directions that explain variance?"
+
+**Problem without orthogonality:**
+- Directions might overlap (redundancy again!)
+- Can't tell which direction contributes what
+- Lose interpretability
+
+**With orthogonal components:**
+- Each PC captures INDEPENDENT variation
+- No overlap between components
+- Can analyze contribution of each separately
+- Clean, interpretable decomposition
+
+**This is why Gram-Schmidt matters!** Ensures orthogonality in numerical implementations.
+
+## Application 2: Least Squares Regression
+
+### What Problem Does Regression Solve?
+
+**Scenario:** Predicting house prices
+
+**You have:**
+- Features: area, bedrooms, age → vector **x**
+- Target: price → value y
+
+**Goal:** Find relationship y = **w**^T**x** + b
+
+**Problem:** Given n data points, find best **w**!
+
+**This is regression!**
+
+### The Root Cause: Data Doesn't Fit Perfectly
+
+**Reality:** No perfect line fits all points
+
+```
+Price
+  ^
+  |    x     x
+  |  x    x
+  | x  x      (scattered points)
+  |x    
+  +-----------> Area
+```
+
+**Question:** What's the "best" line?
+
+**Answer:** The line that minimizes errors!
+
+### Geometric Interpretation: Orthogonal Projection!
+
+**Here's where linear algebra becomes beautiful:**
+
+**Setup:**
+- Data matrix X (n × d): each row is a data point
+- Target vector **y** (n × 1): actual prices
+- Predicted: **ŷ** = X**w**
+
+**Question:** What values can **ŷ** take?
+
+**Answer:** All vectors in column space of X!
+- **ŷ** = X**w** for some **w**
+- This is span of columns of X
+- It's a subspace!
+
+**But:** Actual **y** might NOT be in this subspace!
+
+```
+        y (actual)
+       /|
+      / |
+     /  | ← error (residual)
+    /   |
+   ŷ____| ← closest point in column space
+   
+   (column space of X - a subspace)
+```
+
+**Question:** How do we find the closest point **ŷ** in the subspace to **y**?
+
+**Answer:** ORTHOGONAL PROJECTION!
+
+**The best prediction is the orthogonal projection of y onto the column space of X!**
+
+### Why Orthogonal Projection Minimizes Error
+
+**Residual (error):** **e** = **y** - **ŷ**
+
+**For orthogonal projection:**
+- **e** is perpendicular to column space
+- **e** is perpendicular to ALL columns of X
+- This means: X^T**e** = 0
+
+**This gives us the famous normal equation:**
+
+X^T(**y** - X**w**) = 0
+X^TX**w** = X^T**y**
+**w** = (X^TX)^(-1)X^T**y**
+
+**Beautiful! The best fit is where residuals are orthogonal to the feature space!**
+
+### Example 6.2: Linear Regression
+
+**Data:** Predicting test score from hours studied
+
+```
+Hours (x): [1, 2, 3, 4]
+Score (y): [2, 3, 5, 6]
+```
+
+**Model:** y = wx + b
+
+**In matrix form:**
+```
+X = [1  1]    y = [2]
+    [1  2]        [3]
+    [1  3]        [5]
+    [1  4]        [6]
+```
+(First column for bias term)
+
+**Normal equation:** (X^TX)**w** = X^T**y**
+
+**Calculate X^TX:**
+```
+X^TX = [1 1 1 1] [1  1]   = [4  10]
+       [1 2 3 4] [1  2]     [10 30]
+                 [1  3]
+                 [1  4]
+```
+
+**Calculate X^Ty:**
+```
+X^Ty = [1 1 1 1] [2]   = [16]
+       [1 2 3 4] [3]     [44]
+                 [5]
+                 [6]
+```
+
+**Solve:**
+```
+[4  10] [b]   = [16]
+[10 30] [w]     [44]
+```
+
+From first equation: 4b + 10w = 16 → b = 4 - 2.5w
+Substitute into second: 10(4 - 2.5w) + 30w = 44
+40 - 25w + 30w = 44
+5w = 4
+w = 0.8
+
+Then: b = 4 - 2.5(0.8) = 4 - 2 = 2
+
+**Solution:** y = 0.8x + 2
+
+**Predictions:**
+- x=1: ŷ=2.8 (actual: 2)
+- x=2: ŷ=3.6 (actual: 3)  
+- x=3: ŷ=4.4 (actual: 5)
+- x=4: ŷ=5.2 (actual: 6)
+
+**Residuals:** [-0.8, -0.6, 0.6, 0.8]
+
+**Verify orthogonality:** X^T**e** should be near zero ✓
+
+### When Does X^TX Fail to be Invertible?
+
+**Question:** What if (X^TX) is not invertible?
+
+**This happens when:** Columns of X are linearly dependent!
+
+**Example:** Features are [area in sq ft, area in sq meters]
+- Second is just 0.0929 × first
+- Dependent features!
+- X^TX is singular
+- Can't solve uniquely
+
+**Solution:** Remove dependent features!
+
+**This is why linear independence matters in ML!**
+
+## Application 3: Feature Orthogonalization
+
+### The Multicollinearity Problem
+
+**Scenario:** Predicting salary with:
+- Years of experience
+- Age  
+- Years since degree
+
+**Problem:** These are highly correlated!
+- More experience → older
+- More experience → longer since degree
+- Not independent features!
+
+**Consequences:**
+1. **Unstable coefficients:** Small data changes → huge coefficient changes
+2. **Hard to interpret:** Can't tell which feature matters
+3. **Numerical issues:** Matrix inversion breaks down
+4. **Inflated variance:** Coefficient estimates unreliable
+
+**Root cause:** Features share information - they're not orthogonal!
+
+### How Orthogonalization Helps
+
+**Idea:** Transform features to be orthogonal!
+
+**Method:** Apply Gram-Schmidt to feature vectors!
+
+**Process:**
+1. Keep first feature as is: **u₁** = **x₁**
+2. Remove **x₁** component from **x₂**: **u₂** = **x₂** - proj**ᵤ₁**(**x₂**)
+3. Remove **u₁**, **u₂** components from **x₃**: **u₃** = **x₃** - proj**ᵤ₁**(**x₃**) - proj**ᵤ₂**(**x₃**)
+
+**Result:** New features {**u₁, u₂, u₃**} are orthogonal!
+
+**Benefits:**
+- Each feature adds unique information
+- Stable coefficients
+- Clear interpretation
+- Better numerical properties
+
+### Example 6.3: Orthogonalizing Correlated Features
+
+**Dataset:** 4 houses
+
+```
+Feature 1 (Area):      [1000, 1500, 2000, 2500]
+Feature 2 (Rooms):     [2, 3, 4, 5]
+```
+
+**Check correlation:**
+
+Mean-centered:
+```
+x₁ = [-750, -250, 250, 750]
+x₂ = [-1.5, -0.5, 0.5, 1.5]
+```
+
+**x₁ · x₂** = (-750)(-1.5) + (-250)(-0.5) + (250)(0.5) + (750)(1.5)
+           = 1125 + 125 + 125 + 1125 = 2500
+
+**Highly correlated!** (Large dot product)
+
+**Orthogonalize:**
+
+**u₁** = **x₁** = [-750, -250, 250, 750]
+
+proj**ᵤ₁**(**x₂**) = (2500 / 1,562,500) × **x₁** = 0.0016 × **x₁**
+
+**u₂** = **x₂** - proj**ᵤ₁**(**x₂**) 
+      ≈ **x₂** - [−1.2, -0.4, 0.4, 1.2]
+      ≈ [-0.3, -0.1, 0.1, 0.3]
+
+**Verify:** **u₁ · u₂** ≈ 0 ✓
+
+**Interpretation:**
+- **u₁:** Overall size (area)
+- **u₂:** Room density (rooms per area), independent of size
+
+**Now:** Each feature captures unique information!
+
+## Application 4: Singular Value Decomposition (SVD)
+
+### What is SVD?
+
+**Any matrix A (m × n) can be decomposed as:**
+
+A = UΣV^T
+
+where:
+- **U** (m × m): Orthonormal basis for column space
+- **Σ** (m × n): Diagonal with singular values
+- **V** (n × n): Orthonormal basis for row space
+
+**This is like PCA on steroids!**
+
+### How SVD Uses Our Concepts
+
+**SVD combines everything:**
+
+1. **Orthonormal bases:** U and V have orthonormal columns
+2. **Gram-Schmidt:** Used to compute U and V
+3. **Eigenvalues/vectors:** Related to singular values
+4. **Dimensionality reduction:** Keep only large singular values
+5. **Linear independence:** SVD reveals rank (number of independent columns)
+
+### Applications of SVD
+
+**1. Image Compression**
+
+**Original image:** 1000 × 1000 matrix = 1,000,000 values
+
+**Apply SVD:** A = UΣV^T
+
+**Key insight:** Only first k singular values are large!
+
+**Keep only top k:** A ≈ U_k Σ_k V_k^T
+
+**Storage:** k(1000 + 1 + 1000) instead of 1,000,000
+- If k=100: Need 200,100 instead of 1,000,000
+- 80% compression with minimal quality loss!
+
+**Why it works:** Most singular values are tiny - image has redundancy!
+
+**2. Recommender Systems**
+
+**Matrix:** Users × Movies
+
+**Problem:** Sparse! (Most entries missing)
+
+**SVD gives:**
+- User features (from U)
+- Movie features (from V)  
+- Predict missing ratings!
+
+**Example:** Netflix prize winner used SVD-based methods
+
+**3. Natural Language Processing**
+
+**Term-document matrix:** Words × Documents
+
+**SVD finds:**
+- Latent topics (from Σ)
+- Word-topic relationships (from U)
+- Document-topic relationships (from V)
+
+**This is Latent Semantic Analysis (LSA)!**
+
+### Example 6.4: SVD for Image Compression
+
+**Small image (4×4):**
+```
+A = [8  7  6  5]
+    [7  6  5  4]
+    [6  5  4  3]
+    [5  4  3  2]
+```
+
+**Apply SVD:** A = UΣV^T
+
+**Singular values (diagonal of Σ):**
+σ₁ ≈ 18.37 (very large!)
+σ₂ ≈ 0.54 (tiny)
+σ₃ ≈ 0.00 (negligible)
+σ₄ ≈ 0.00 (negligible)
+
+**Observation:** First singular value dominates!
+
+**Rank-1 approximation:** Keep only σ₁
+
+```
+A₁ = σ₁ u₁ v₁^T ≈ [7.9  6.9  5.9  4.9]
+                   [6.9  6.0  5.1  4.1]
+                   [5.9  5.1  4.3  3.4]
+                   [4.9  4.1  3.4  2.6]
+```
+
+**Error:** Very small! (Most values within 0.1 of original)
+
+**Compression:** 
+- Original: 16 values
+- Compressed: 4 (u₁) + 1 (σ₁) + 4 (v₁) = 9 values
+- 44% reduction!
+
+## Application 5: Neural Network Weight Initialization
+
+### Why Orthogonal Initialization?
+
+**Problem:** Training deep neural networks
+
+**Challenge:** Gradients vanish or explode
+- Too small → no learning
+- Too large → instability
+
+**Question:** How should we initialize weights?
+
+**Answer:** Use orthogonal matrices!
+
+### Why Orthogonality Helps
+
+**Orthogonal matrices preserve norms:**
+
+If Q is orthogonal: ||Q**x**|| = ||**x**||
+
+**This means:**
+- No explosion (can't make signals bigger)
+- No vanishing (can't make signals smaller)
+- Stable gradient flow!
+
+**How to create:** Use Gram-Schmidt on random vectors!
+
+### Example: Initializing a Layer
+
+**Layer:** 100 neurons → 100 neurons
+
+**Weight matrix:** 100 × 100
+
+**Random initialization:**
+```python
+W = random_matrix(100, 100)
+# Apply Gram-Schmidt to columns
+Q = gram_schmidt(W)
+# Q is now orthogonal!
+```
+
+**Benefits:**
+- Signals preserve magnitude through layer
+- Gradients flow smoothly
+- Faster convergence
+- Better final performance
+
+**This is called "orthogonal initialization"!**
+
+## Application 6: Independent Component Analysis (ICA)
+
+### The Cocktail Party Problem
+
+**Scenario:** Recording a party
+
+**You have:** 3 microphones
+**Recording:** Mix of 3 people talking
+
+```
+Mic 1: 0.7×person1 + 0.2×person2 + 0.1×person3
+Mic 2: 0.1×person1 + 0.8×person2 + 0.1×person3  
+Mic 3: 0.2×person1 + 0.1×person2 + 0.7×person3
+```
+
+**Goal:** Separate individual voices!
+
+**This is ICA's job!**
+
+### How ICA Relates to Linear Independence
+
+**Key assumption:** Original sources are independent
+- Person 1's speech independent of Person 2's
+- Statistically independent signals
+
+**ICA finds:** Transformation that makes signals independent
+- Like finding independent basis vectors
+- But using statistical independence, not just orthogonality
+
+**Difference from PCA:**
+- PCA: Finds orthogonal directions (geometric independence)
+- ICA: Finds statistically independent sources (probabilistic independence)
+
+**Both use:** Linear algebra concepts we've learned!
+
+## Application 7: Dimensionality of Embeddings
+
+### Word Embeddings in NLP
+
+**Problem:** Representing words for machine learning
+
+**Naive approach:** One-hot encoding
+- Vocabulary: 50,000 words
+- Each word: 50,000-dimensional vector (49,999 zeros, one 1)
+- Huge! Sparse! No relationships captured!
+
+**Better approach:** Word embeddings
+- Each word: dense vector in 300 dimensions
+- Similar words have similar vectors
+- Captures semantic relationships
+
+**Question:** Why 300 dimensions? Why not 50,000?
+
+**Answer:** The true "dimensionality" of word meanings is much lower!
+- Actual semantic space has much lower dimension
+- Words lie in lower-dimensional manifold
+- 300 dimensions capture essence
+
+**This uses concepts of:**
+- Basis and dimension
+- Dimensionality reduction
+- Linear independence of semantic directions
+
+### Example: Word Relationships
+
+**Classic example:**
+
+king - man + woman ≈ queen
+
+**In vector space:**
+```
+v(king) - v(man) + v(woman) ≈ v(queen)
+```
+
+**This works because:**
+- "Royalty" dimension
+- "Gender" dimension  
+- These are roughly orthogonal directions!
+
+**The embedding captures independent semantic dimensions!**
+
+## Summary: Why Linear Algebra Powers ML
+
+**Let's step back and see the big picture:**
+
+**Question:** Why does all this abstract math appear everywhere in machine learning?
+
+**Answer:** Data is fundamentally about relationships and structure!
+
+**Linear algebra provides:**
+
+1. **Language for relationships**
+   - Dot products measure similarity
+   - Projections find closest representations
+   - Orthogonality means independence
+
+2. **Tools for dimensionality**
+   - Find true dimension of data (PCA)
+   - Reduce computational cost
+   - Reveal hidden structure
+
+3. **Geometric intuition**
+   - Data lives in high-dimensional spaces
+   - We visualize using subspaces
+   - Projections, distances, angles all matter
+
+4. **Computational efficiency**
+   - Matrix operations are fast
+   - Orthogonal transformations stable
+   - Vectorization accelerates processing
+
+5. **Theoretical foundations**
+   - Uniqueness of solutions (linear independence)
+   - Optimal approximations (projections)
+   - Guaranteed convergence (orthogonality)
+
+**Every concept we learned has direct applications:**
+
+| Concept | ML Application |
+|---------|---------------|
+| Linear Independence | Feature selection, detecting redundancy |
+| Span | Representing data, understanding capacity |
+| Basis | Coordinate systems, embeddings |
+| Dimension | Complexity, capacity, compression |
+| Orthogonality | Decorrelation, independence |
+| Gram-Schmidt | QR decomposition, orthogonal initialization |
+| Projection | Regression, PCA, nearest neighbors |
+| Orthonormal bases | Fast computations, stability |
+
+**The beauty:** Simple geometric ideas scale to millions of dimensions!
+
+## Practice Problems - Applications
+
+**Problem 6.1: PCA by Hand**
+
+Dataset (3 students, 2 tests):
+```
+Math: [90, 60, 75]
+Physics: [85, 58, 72]
+```
+
+a) Center the data
+b) Compute covariance matrix
+c) Find principal components (eigenvectors)
+d) What % variance does PC1 explain?
+e) Reduce to 1D using PC1
+
+**Problem 6.2: Regression Geometry**
+
+Data: x = [1, 2, 3], y = [2, 3, 5]
+
+a) Form X matrix (include bias column)
+b) Solve normal equation
+c) Compute residuals
+d) Verify X^T e = 0 (orthogonality)
+e) Geometric interpretation: where does ŷ live?
+
+**Problem 6.3: Feature Orthogonalization**
+
+Features (4 samples):
+```
+x₁ = [1, 2, 3, 4]
+x₂ = [2, 4, 6, 8] 
+```
+
+a) Why is this problematic?
+b) Apply Gram-Schmidt
+c) Interpret new features
+d) Verify orthogonality
+
+**Problem 6.4: SVD Compression**
+
+Matrix:
+```
+A = [4  4]
+    [4  4]
+    [2  2]
+```
+
+a) What's the rank?
+b) Apply SVD (or describe expected result)
+c) How many singular values are non-zero?
+d) Compress using rank-1 approximation
+e) What's the error?
+
+**Problem 6.5: Multicollinearity Detection**
+
+You have features: [age, experience, years_since_degree]
+
+a) Why might these be dependent?
+b) How would you check mathematically?
+c) What problems does this cause in regression?
+d) Propose solution using concepts from this chapter
+
+**Problem 6.6: PCA Interpretation**
+
+After PCA on image dataset:
+- PC1: [0.3, 0.3, 0.4, ...] (300 pixel weights)
+- Explains 60% variance
+- All weights positive
+
+a) What might PC1 represent? (Hint: brightness?)
+b) If PC2 has positive and negative weights?
+c) Why do we need fewer PCs than original dimensions?
+
+**Problem 6.7: Orthogonal Initialization**
+
+Neural network layer: 50 input → 50 output neurons
+
+a) Size of weight matrix?
+b) Why initialize with orthogonal matrix?
+c) How does this help gradient flow?
+d) How to create orthogonal matrix? (Use Gram-Schmidt!)
+
+**Problem 6.8: ICA vs PCA**
+
+Audio signals: Mix of 2 independent sources
+
+a) Would PCA separate the sources? Why/why not?
+b) What's different about ICA?
+c) Both find basis vectors - what's different about the bases?
+
+**Problem 6.9: Embeddings**
+
+Word embeddings: 50,000 words, 300 dimensions
+
+a) Why not use 50,000 dimensions?
+b) What determines actual dimensionality needed?
+c) If "king - man + woman = queen" works, what does this say about the basis?
+
+**Problem 6.10: Bringing It All Together**
+
+You're building a recommender system:
+- User-item matrix: 10,000 users × 5,000 movies
+- Mostly empty (sparse)
+- Want to predict missing ratings
+
+a) What's wrong with using the data directly? (Dimensionality!)
+b) How could PCA/SVD help?
+c) What do the singular vectors represent?
+d) How many dimensions do you really need? (Much less!)
+e) Connect to concepts: basis, dimension, orthogonality
+
+---
+
+**End of Section 5.6: Applications to Machine Learning**
+
+**Key takeaways:**
+- ✅ PCA finds orthogonal directions of maximum variance
+- ✅ Regression is orthogonal projection onto feature space
+- ✅ Feature orthogonalization removes multicollinearity
+- ✅ SVD provides low-rank approximations for compression
+- ✅ Orthogonal initialization stabilizes neural network training
+- ✅ ICA finds statistically independent components
+- ✅ Embeddings capture true dimensionality of semantic spaces
+- ✅ All concepts (independence, basis, orthogonality) are fundamental to ML
+
+**Next: Section 5.7 - Comprehensive Practice Problems**
+
+---
+
+<a name="practice"></a>
+# 7. Comprehensive Practice Problems
+
+## Introduction: Testing Your Understanding
+
+These problems integrate ALL concepts from this chapter:
+- Linear Independence
+- Span and Subspaces
+- Basis and Dimension
+- Orthogonality
+- Gram-Schmidt Process
+- Machine Learning Applications
+
+**Approach each problem by asking:**
+1. What's the underlying problem?
+2. What's the root cause?
+3. Which concept helps solve it?
+4. How do the pieces connect?
+
+---
+
+## Section A: Conceptual Understanding
+
+### Problem 7.1: The Big Picture
+
+**Question:** You're explaining linear algebra to a friend learning ML. They ask:
+
+*"I have 1000 features in my dataset. My professor said only 50 are 'truly independent' and I can reduce to 50 dimensions without losing much. What does this mean? How is this even possible?"*
+
+Using concepts from this chapter, explain:
+
+a) What does "truly independent" mean in terms of linear independence?
+
+b) Why might 1000 features only have 50 independent directions?
+
+c) How would you find these 50 directions? (Name the technique and explain the process)
+
+d) What role does orthogonality play in this reduction?
+
+e) Connect this to the concepts of basis and dimension
+
+**Hint:** Walk through the reasoning: redundancy → dependence → finding basis → orthogonal directions → PCA
+
+---
+
+### Problem 7.2: Connecting the Dots
+
+**Fill in the reasoning chain:**
+
+*"I have vectors that are NOT orthogonal..."*
+
+a) **Problem:** What issues does this create?
+
+b) **Root cause:** Why aren't they orthogonal?
+
+c) **Solution:** What process makes them orthogonal?
+
+d) **Benefit:** Why is the orthogonal version better?
+
+e) **Application:** Name 3 ML applications where orthogonal vectors matter
+
+---
+
+### Problem 7.3: Independence vs Orthogonality
+
+**Question:** A student says: *"Independent vectors and orthogonal vectors are the same thing, right?"*
+
+a) Are they correct? Why or why not?
+
+b) Give an example of vectors that are:
+   - Independent but NOT orthogonal
+   - Orthogonal (and therefore independent)
+
+c) If vectors are orthogonal, are they always independent? Prove it.
+
+d) If vectors are independent, are they always orthogonal? Show counterexample.
+
+e) Which is a stronger condition? Why?
+
+---
+
+## Section B: Computational Problems
+
+### Problem 7.4: Complete Workflow - From Dependent to Orthonormal
+
+**Given vectors in ℝ³:**
+```
+v₁ = (1, 2, 0)
+v₂ = (2, 5, 0)
+v₃ = (0, 0, 3)
+```
+
+**Part A: Analysis**
+
+a) Are these vectors linearly independent? Test it.
+
+b) What's the span of these vectors? Describe geometrically.
+
+c) What's the dimension of the span?
+
+d) Do these form a basis for ℝ³? Why or why not?
+
+**Part B: Check Orthogonality**
+
+e) Calculate all pairwise dot products
+
+f) Which pairs are orthogonal?
+
+g) Which pairs are NOT orthogonal?
+
+**Part C: Apply Gram-Schmidt**
+
+h) Apply Gram-Schmidt to create orthogonal set {u₁, u₂, u₃}
+
+i) Verify orthogonality of your result
+
+**Part D: Create Orthonormal Basis**
+
+j) Normalize each orthogonal vector
+
+k) Verify you have an orthonormal basis
+
+l) Express the vector (3, 7, 6) in this new basis
+
+---
+
+### Problem 7.5: PCA Step-by-Step
+
+**Dataset: 4 students, 2 test scores**
+
+```
+        Test 1   Test 2
+Student A:  80      78
+Student B:  90      88
+Student C:  70      68
+Student D:  60      58
+```
+
+**Part A: Understand the Data**
+
+a) Plot the data points. Do scores seem correlated?
+
+b) Calculate correlation coefficient between Test 1 and Test 2
+
+c) What does this correlation tell you about independence?
+
+**Part B: Apply PCA**
+
+d) Center the data (subtract means)
+
+e) Compute covariance matrix C = (1/n)X^T X
+
+f) Find eigenvalues and eigenvectors of C
+
+g) Which eigenvector is PC1? What's its eigenvalue?
+
+h) What percentage of variance does PC1 explain?
+
+**Part C: Interpretation**
+
+i) What does PC1 represent? (Look at eigenvector components)
+
+j) If you keep only PC1, what information do you lose?
+
+k) Transform students to 1D using PC1
+
+l) Verify: Can you recover approximate original scores?
+
+**Part D: Connection to Concepts**
+
+m) Is the PC basis orthogonal? Verify.
+
+n) What's the dimension of the original space? The reduced space?
+
+o) Why does this work? (Explain using span and basis)
+
+---
+
+### Problem 7.6: Regression as Projection
+
+**Data: Predicting y from x**
+
+```
+x: [1, 2, 4, 5]
+y: [2, 3, 4, 6]
+```
+
+**Part A: Set Up**
+
+a) Form the design matrix X (include column of 1s for bias)
+
+b) Visualize: plot the points
+
+c) What space do predictions ŷ = Xw live in? (Describe geometrically)
+
+**Part B: Solve**
+
+d) Compute X^T X
+
+e) Compute X^T y
+
+f) Solve normal equation: (X^T X)w = X^T y
+
+g) What's your prediction equation?
+
+**Part C: Geometric Understanding**
+
+h) Compute predictions ŷ = Xw
+
+i) Compute residuals e = y - ŷ
+
+j) Verify orthogonality: X^T e = 0 (or very close)
+
+k) What does this orthogonality mean geometrically?
+
+**Part D: Column Space**
+
+l) What's the column space of X? Describe it.
+
+m) Is y in the column space? How do you know?
+
+n) Where is ŷ in relation to the column space?
+
+o) Why is ŷ the "best" approximation? (Use projection concept)
+
+---
+
+### Problem 7.7: Feature Orthogonalization in Action
+
+**Features from 5 houses:**
+
+```
+Area (sq ft):     [1000, 1500, 2000, 2500, 3000]
+Bedrooms:         [2, 3, 4, 5, 6]
+Age (years):      [5, 10, 15, 20, 25]
+```
+
+**Part A: Detect Dependence**
+
+a) Center each feature (subtract mean)
+
+b) Compute all pairwise dot products
+
+c) Which features are most correlated?
+
+d) Would you expect multicollinearity problems? Why?
+
+**Part B: Orthogonalize**
+
+e) Apply Gram-Schmidt: u₁ = centered Area, orthogonalize others
+
+f) Compute the new orthogonal features {u₁, u₂, u₃}
+
+g) Verify pairwise orthogonality
+
+**Part C: Interpretation**
+
+h) What does u₁ represent?
+
+i) What does u₂ represent? (Independent of area)
+
+j) What does u₃ represent? (Independent of both)
+
+k) Why is this better for regression?
+
+**Part D: Compare**
+
+l) If you ran regression on original features, what problems might occur?
+
+m) If you ran regression on orthogonal features, what improves?
+
+n) Do both give same predictions? (They should!)
+
+o) Which coefficient estimates are more stable?
+
+---
+
+## Section C: Theoretical Problems
+
+### Problem 7.8: Proving Properties
+
+**Part A: Orthogonal Sets**
+
+Prove: If {v₁, v₂, ..., vₖ} is an orthogonal set of non-zero vectors, then it's linearly independent.
+
+**Hint:** Assume c₁v₁ + c₂v₂ + ... + cₖvₖ = 0, then dot both sides with vᵢ
+
+**Part B: Gram-Schmidt**
+
+Prove: The Gram-Schmidt process preserves span.
+
+That is, show: span{v₁, v₂, ..., vₖ} = span{u₁, u₂, ..., uₖ}
+
+**Hint:** Show each vᵢ is in span{u₁, ..., uᵢ} and vice versa
+
+**Part C: Projection**
+
+Prove: If u is a unit vector, then ||v - proj_u(v)||² + ||proj_u(v)||² = ||v||²
+
+**Hint:** This is Pythagorean theorem! Show (v - proj_u(v)) ⊥ proj_u(v)
+
+---
+
+### Problem 7.9: Dimension Counting
+
+**Part A: General Principle**
+
+In ℝⁿ, prove you cannot have more than n linearly independent vectors.
+
+**Hint:** Think about what happens with n+1 vectors in n dimensions
+
+**Part B: Subspaces**
+
+a) Prove: If W is a k-dimensional subspace of ℝⁿ, then W^⊥ has dimension n-k
+
+b) Give geometric interpretation in ℝ³
+
+**Part C: Rank**
+
+a) If A is m×n with rank r, what's dim(column space)?
+
+b) What's dim(null space)?
+
+c) Prove: rank + nullity = n
+
+---
+
+### Problem 7.10: Optimality of Projections
+
+**Theorem:** proj_W(v) minimizes ||v - w|| over all w in W
+
+**Part A:** Understand the claim
+- What does this mean geometrically?
+- Why would projection be closest?
+
+**Part B:** Prove it
+- Let w be any vector in W
+- Show ||v - proj_W(v)||² ≤ ||v - w||²
+
+**Hint:** Write w = proj_W(v) + (w - proj_W(v)) and use orthogonality
+
+**Part C:** Connect to regression
+- How does this relate to least squares?
+- Why is the normal equation solution optimal?
+
+---
+
+## Section D: Real-World Applications
+
+### Problem 7.11: Image Compression with SVD
+
+**Scenario:** You have a 1000×1000 grayscale image (1 million pixels)
+
+**After SVD:** You find:
+- First 50 singular values are large
+- Remaining 950 are negligible (< 1% of largest)
+
+**Part A: Analysis**
+
+a) What does this tell you about the image?
+
+b) Why do most singular values being small matter?
+
+c) What's the true "dimensionality" of the image data?
+
+**Part B: Compression**
+
+d) If you keep only 50 singular values, how much storage do you need?
+   - Original: 1 million values
+   - Compressed: ? values
+
+e) Calculate compression ratio
+
+f) Why doesn't this lose much image quality?
+
+**Part C: Connection to Concepts**
+
+g) The 50 singular vectors form what? (Think basis)
+
+h) Are these vectors orthogonal? Why does that matter?
+
+i) How is this similar to PCA?
+
+j) Could you use Gram-Schmidt here? Where?
+
+---
+
+### Problem 7.12: Building a Recommender System
+
+**Scenario:** Movie recommendations
+
+**Data:** 1000 users × 500 movies matrix (mostly empty)
+
+**Goal:** Predict missing ratings
+
+**Part A: The Problem**
+
+a) What's wrong with using the raw matrix?
+   - Dimensionality issues?
+   - Sparsity problems?
+
+b) What do you suspect about the true dimensionality?
+   - Are all 500 movie dimensions independent?
+   - Might preferences lie in lower-dimensional space?
+
+**Part B: Apply SVD**
+
+c) After SVD, you keep 20 singular values. What do these represent?
+
+d) U gives user features (1000×20). What does each column mean?
+
+e) V gives movie features (500×20). What does each column mean?
+
+f) How do you predict rating for user i, movie j?
+
+**Part C: Interpretation**
+
+g) The 20 dimensions might represent what? (Genre preferences? Actor preferences?)
+
+h) Why is this better than original 500 dimensions?
+
+i) How does orthogonality of singular vectors help?
+
+j) Connect to concepts: basis, dimension reduction, independence
+
+---
+
+### Problem 7.13: Neural Network Initialization
+
+**Scenario:** Training a neural network
+
+**Layer:** 128 input neurons → 128 output neurons
+
+**Part A: The Problem**
+
+a) Weight matrix size?
+
+b) If initialized randomly (say, Gaussian), what problems occur?
+   - Gradient vanishing?
+   - Gradient explosion?
+
+c) What's the root cause? (Think about repeated multiplications)
+
+**Part B: Orthogonal Initialization**
+
+d) Generate random 128×128 matrix. Apply Gram-Schmidt. Now weights are orthogonal.
+
+e) Why does orthogonal initialization help?
+   - What property do orthogonal matrices have?
+   - How does this affect gradient flow?
+
+f) Prove: If Q is orthogonal, ||Qx|| = ||x||
+
+**Part C: Practical Considerations**
+
+g) Do you need EXACT orthogonality? (Computational cost?)
+
+h) Modified Gram-Schmidt vs Classical - which for large matrices?
+
+i) Alternative: Random orthogonal matrix (cheaper). How?
+
+j) Why does this matter more for deep networks?
+
+---
+
+### Problem 7.14: Text Analysis with LSA
+
+**Scenario:** Analyzing documents
+
+**Term-document matrix:** 10,000 words × 1,000 documents
+
+**Part A: Curse of Dimensionality**
+
+a) Working in 10,000 dimensions - what problems?
+
+b) Most word combinations never occur - what does this mean?
+
+c) Synonym problem: "car" and "automobile" treated as different dimensions. Issue?
+
+**Part B: Apply SVD (Latent Semantic Analysis)**
+
+d) Keep top 100 singular values. What do these represent?
+
+e) How does this solve synonym problem?
+   - "car" and "automobile" now close in 100D space!
+
+f) Why 100 dimensions better than 10,000?
+
+**Part C: Geometric Interpretation**
+
+g) The 100-dimensional space represents what? (Latent topics?)
+
+h) Documents are projected onto this space. What does closeness mean?
+
+i) How are the 100 dimensions chosen? (Maximum variance?)
+
+j) Why must the basis vectors be orthogonal?
+
+---
+
+### Problem 7.15: Putting It All Together - ML Pipeline
+
+**Complete scenario:** Predicting house prices
+
+**Data:** 1,000 houses, 50 features
+
+**Step 1: Exploration**
+
+a) Check for linear dependence among features
+   - Method?
+   - What if you find dependent features?
+
+b) Check for multicollinearity
+   - Compute correlation matrix?
+   - Threshold for concern?
+
+**Step 2: Preprocessing**
+
+c) Some features highly correlated. Options:
+   - Remove redundant features?
+   - Orthogonalize using Gram-Schmidt?
+   - Apply PCA?
+
+d) You choose PCA. Steps:
+   - Center data
+   - Compute covariance matrix
+   - Find eigenvectors
+   - How many components to keep?
+
+**Step 3: Dimension Reduction**
+
+e) You keep 15 principal components (explain 95% variance)
+
+f) Transform data to 15D
+
+g) Why is this better than original 50D?
+   - Computational efficiency?
+   - Overfitting prevention?
+   - Feature independence?
+
+**Step 4: Regression**
+
+h) Fit regression in 15D space
+
+i) Geometry: What is ŷ? (Projection!)
+
+j) Residuals orthogonal to what?
+
+**Step 5: Interpretation**
+
+k) Coefficients now in PC space. Can you interpret?
+   - PC1 might be "overall size"
+   - PC2 might be "luxury vs budget"
+
+l) How to transform back to original features if needed?
+
+**Step 6: Reflection**
+
+m) List every concept from this chapter you used:
+   - Linear independence?
+   - Basis?
+   - Orthogonality?
+   - Gram-Schmidt?
+   - Projection?
+
+n) How did they all connect?
+
+o) Why does linear algebra make this possible?
+
+---
+
+## Section E: Challenge Problems
+
+### Problem 7.16: Designing Your Own Basis
+
+**Task:** Create an orthonormal basis for ℝ³ where:
+- First vector points toward (1, 1, 1)
+- Second vector lies in xy-plane
+- Third vector completes the right-handed system
+
+**Part A: Plan**
+
+a) What's your strategy?
+
+b) Which theorem/algorithm will you use?
+
+c) Are there multiple solutions?
+
+**Part B: Execute**
+
+d) Normalize (1, 1, 1) → q₁
+
+e) Choose a vector in xy-plane, orthogonalize to q₁ → q₂
+
+f) Find q₃ (hint: cross product or Gram-Schmidt with any third vector)
+
+g) Verify orthonormality
+
+**Part C: Use It**
+
+h) Express (5, 3, 2) in your new basis
+
+i) Verify by converting back
+
+j) Why might this basis be useful? (Applications?)
+
+---
+
+### Problem 7.17: Rank-Deficient Regression
+
+**Problem:** You have perfect multicollinearity
+
+**Features:**
+```
+x₁ = [1, 2, 3, 4]
+x₂ = [2, 4, 6, 8]  (= 2x₁)
+```
+
+**Target:** y = [3, 5, 7, 9]
+
+**Part A: The Problem**
+
+a) Form design matrix X. What's its rank?
+
+b) Try to compute (X^T X)^(-1). What happens?
+
+c) Why can't you solve uniquely?
+
+d) Geometric interpretation: Column space?
+
+**Part B: Solutions**
+
+e) Remove x₂. Solve with just x₁. What coefficient?
+
+f) Remove x₁. Solve with just x₂. What coefficient?
+
+g) Use x₁ + x₂ as single feature. Solve. What coefficient?
+
+h) Do all give same predictions? Verify!
+
+**Part C: General Lesson**
+
+i) What's the root cause of the problem?
+
+j) How to detect this before fitting?
+
+k) General strategy for handling?
+
+l) Why does linear independence matter here?
+
+---
+
+### Problem 7.18: Optimal Subspace for Data
+
+**Challenge:** Given data points, find the best k-dimensional subspace
+
+**Data (5 points in ℝ³):**
+```
+p₁ = (1, 2, 0)
+p₂ = (2, 3, 1)
+p₃ = (3, 5, 1)
+p₄ = (4, 6, 2)
+p₅ = (5, 8, 2)
+```
+
+**Goal:** Find best 2D subspace (plane through origin) that approximates data
+
+**Part A: What is "Best"?**
+
+a) Define "best" - minimize what?
+
+b) This is PCA! Why?
+
+c) Connection to projection?
+
+**Part B: Solve**
+
+d) Center the data
+
+e) Find covariance matrix
+
+f) Find top 2 eigenvectors (PC1 and PC2)
+
+g) These span the best 2D subspace!
+
+**Part C: Analysis**
+
+h) Project each point onto the 2D subspace
+
+i) Compute total error (sum of squared distances)
+
+j) What percentage of variance is explained?
+
+k) Why is this plane "optimal"?
+
+**Part D: Theory**
+
+l) Prove: The PC subspace minimizes total squared error
+
+m) Why must PCs be orthogonal?
+
+n) Could you find the plane without eigenvalues? (Yes, via Gram-Schmidt on certain directions)
+
+---
+
+### Problem 7.19: Condition Number and Orthogonality
+
+**Advanced:** Numerical stability
+
+**Part A: Condition Number**
+
+Given matrix A, condition number κ(A) = ||A|| ||A^(-1)||
+- Large κ → ill-conditioned (numerical problems)
+- Small κ → well-conditioned (stable)
+
+a) For orthogonal matrix Q, prove κ(Q) = 1 (optimal!)
+
+b) Why does this make orthogonal matrices numerically stable?
+
+**Part B: Gram-Schmidt vs QR**
+
+c) Classical Gram-Schmidt can be numerically unstable. Why?
+
+d) Modified Gram-Schmidt is better. Why?
+
+e) Householder QR is even better. Research and explain.
+
+**Part C: Real Impact**
+
+f) When does numerical instability matter?
+   - Small eigenvalues?
+   - Nearly-dependent vectors?
+
+g) How to detect ill-conditioning?
+
+h) Practical strategies?
+
+---
+
+### Problem 7.20: Creating Synthetic Data
+
+**Design challenge:** Create a dataset for teaching PCA
+
+**Requirements:**
+- 100 data points
+- Originally 10 features
+- True dimension is 3 (lies in 3D subspace of ℝ¹⁰)
+- Add small noise
+
+**Part A: Design**
+
+a) How would you generate this?
+   - Start with 3D data?
+   - Create 10D via linear combinations?
+   - Add noise?
+
+b) Write the procedure step-by-step
+
+c) Implement it (pseudocode or actual code)
+
+**Part B: Verify**
+
+d) Apply PCA to your synthetic data
+
+e) Do you recover 3 principal components?
+
+f) How much variance do they explain?
+
+g) Can you recover the original 3D structure?
+
+**Part C: Teaching Tool**
+
+h) Why is synthetic data useful for teaching?
+
+i) What concepts does this illustrate?
+
+j) How could you modify it to teach other concepts?
+   - Make features dependent?
+   - Make features orthogonal from the start?
+   - Vary noise levels?
+
+---
+
+## Section F: Reflection and Synthesis
+
+### Problem 7.21: The Grand Connection
+
+**Essay question:** Explain how ALL major concepts in this chapter connect to each other.
+
+Your explanation should:
+
+a) Start with linear independence - why it matters
+
+b) Build to span and subspaces - what they represent
+
+c) Introduce basis and dimension - minimal spanning sets
+
+d) Add orthogonality - perpendicular directions
+
+e) Show how Gram-Schmidt connects independence to orthogonality
+
+f) Demonstrate why orthonormal bases are special
+
+g) Connect to projections and least squares
+
+h) Apply to PCA and SVD
+
+i) Show relevance to machine learning
+
+j) End with why this foundation matters for AI
+
+**Format:** Write as if explaining to a fellow student. Use examples, analogies, and build intuition step by step.
+
+---
+
+### Problem 7.22: Your Own Application
+
+**Creative challenge:** Find a new application of these concepts
+
+**Task:** Identify a problem (in ML or elsewhere) where linear independence, orthogonality, or related concepts play a key role.
+
+**Structure your answer:**
+
+a) **Describe the problem**
+   - What are you trying to do?
+   - What data do you have?
+
+b) **Identify the challenge**
+   - What makes it hard?
+   - Where does dimensionality/dependence/correlation appear?
+
+c) **Apply concepts**
+   - Which concepts from this chapter help?
+   - How would you use them?
+
+d) **Solve step-by-step**
+   - Give concrete algorithm/procedure
+   - Use actual linear algebra
+
+e) **Analyze the solution**
+   - Why does it work?
+   - What role does each concept play?
+
+**Examples to inspire you:**
+- Signal processing (audio/video)
+- Genomics (gene expression data)
+- Finance (portfolio optimization)
+- Computer graphics (transformations)
+- Robotics (motion planning)
+- Climate science (pattern detection)
+
+---
+
+## Answer Guide for Selected Problems
+
+### Hints for Problem 7.4 (Complete Workflow)
+
+**Part A:**
+- Test independence: Solve c₁v₁ + c₂v₂ + c₃v₃ = 0
+- Notice v₁ and v₂ both have zero z-component
+- v₃ is clearly independent of the plane
+
+**Part C:**
+- u₁ = v₁ (start with first)
+- For u₂: Remove projection of v₂ onto u₁
+- For u₃: Remove projections onto both u₁ and u₂
+
+**Part D:**
+- Divide each uᵢ by ||uᵢ||
+- Verify: qᵢ · qⱼ = δᵢⱼ (Kronecker delta)
+
+### Hints for Problem 7.5 (PCA)
+
+**Part B:**
+- Mean of Test 1: 75
+- Mean of Test 2: 73
+- Center: Subtract these means
+- Covariance matrix is 2×2 - easy to work with!
+
+**Part C:**
+- Eigenvector weights tell you how features combine
+- Nearly equal weights → "overall ability"
+- Opposite signs → "contrast"
+
+### Hints for Problem 7.6 (Regression)
+
+**Part A:**
+```
+X = [1  1]
+    [1  2]
+    [1  4]
+    [1  5]
+```
+
+**Part C:**
+- Column space of X is a 2D plane in ℝ⁴
+- y might not be in this plane
+- ŷ is closest point in plane to y
+
+### Hints for Problem 7.15 (ML Pipeline)
+
+This problem ties everything together!
+
+**Key insights:**
+- Linear dependence → Remove redundant features
+- PCA → Find orthogonal directions of max variance
+- Dimension reduction → Keep only important PCs
+- Regression → Project onto column space
+- Orthogonality → Clean, independent features
+
+**The full pipeline uses EVERY concept from the chapter!**
+
+---
+
+## Final Thoughts
+
+These problems are designed to:
+
+1. **Test understanding** - Not just memorization
+2. **Build intuition** - Geometric and algebraic
+3. **Connect concepts** - See how ideas relate
+4. **Apply to ML** - Real-world relevance
+5. **Challenge thinking** - Go beyond basics
+
+**Remember the core questions:**
+- What's the problem?
+- What's the root cause?
+- How do concepts connect?
+- Why does the solution work?
+
+**Most importantly:** Linear algebra isn't just math - it's the language of data, geometry, and relationships. Master these foundations, and you master the mathematics of machine learning!
+
+---
+
+**End of Chapter 5: Linear Independence, Basis, and Orthogonality**
+
+**Congratulations on completing this comprehensive chapter!**
+
+**You now understand:**
+- ✅ When vectors are truly independent
+- ✅ How to find minimal spanning sets (bases)
+- ✅ Why orthogonality makes computations easier
+- ✅ How to create orthogonal bases (Gram-Schmidt)
+- ✅ Why these concepts power modern machine learning
+- ✅ How to apply theory to real problems
+
+**Next steps:**
+- Practice these problems
+- Implement algorithms in code
+- Apply to your own datasets
+- Explore advanced topics (eigendecomposition, SVD details)
+- Build intuition through visualization
+
+**Keep asking "why?" and building from first principles!**
