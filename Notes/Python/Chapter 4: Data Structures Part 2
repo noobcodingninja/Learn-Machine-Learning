@@ -1,0 +1,749 @@
+# Chapter 4: Data Structures Part 2
+## Tuples, Sets, and Dictionaries
+
+---
+
+## Part 1: Foundation (Parts 1-6)
+
+---
+
+## Part 1: The Problem We're Solving - Why Multiple Data Structures?
+
+### The Real-World Problem
+
+You learned lists in Chapter 3. So why do we need MORE data structures?
+
+**The problem**: Different problems need different solutions.
+
+Think about real-world scenarios:
+
+**Scenario 1: GPS Coordinates**
+```python
+# A location never changes after creation
+location = [40.7128, -74.0060]  # New York
+location[0] = 999  # OOPS! Someone changed it by mistake!
+```
+**Need**: Immutable (unchangeable) collection → **TUPLE**
+
+**Scenario 2: Email List**
+```python
+subscribers = ["alice@email.com", "bob@email.com", "alice@email.com"]
+# Duplicate Alice! We want unique emails only
+```
+**Need**: Collection with NO duplicates → **SET**
+
+**Scenario 3: Phone Book**
+```python
+contacts = [["Alice", "555-1234"], ["Bob", "555-5678"]]
+# To find Bob's number, we need to loop through everything!
+for name, phone in contacts:
+    if name == "Bob":
+        print(phone)  # Inefficient!
+```
+**Need**: Fast lookup by name → **DICTIONARY**
+
+### Why Different Data Structures?
+
+Each data structure solves specific problems:
+
+| Data Structure | Use When You Need | Example |
+|---------------|-------------------|---------|
+| **List** | Ordered, changeable, duplicates OK | Shopping list, scores |
+| **Tuple** | Ordered, UNCHANGEABLE, duplicates OK | Coordinates, RGB colors |
+| **Set** | NO duplicates, unordered, changeable | Unique tags, members |
+| **Dictionary** | Key-value pairs, fast lookup | Phone book, settings |
+
+**Key insight**: Choosing the right data structure makes your code faster, clearer, and less buggy!
+
+---
+
+## Part 2: Tuples - Immutable Sequences
+
+### What Are Tuples?
+
+**A tuple is like a list, but IMMUTABLE (cannot be changed after creation).**
+
+Think of tuples as:
+- A sealed envelope (can't change contents)
+- A date on a calendar (can't modify history)
+- GPS coordinates (fixed location)
+
+```python
+# Creating tuples
+coordinates = (40.7128, -74.0060)
+rgb_color = (255, 0, 128)
+person = ("Alice", 25, "Engineer")
+
+# With one item, need trailing comma
+single = (42,)  # Tuple
+not_tuple = (42)  # Just a number in parentheses!
+
+# Empty tuple
+empty = ()
+
+# Without parentheses (tuple packing)
+point = 10, 20  # Also a tuple!
+```
+
+### Why Use Tuples?
+
+**Problem tuples solve**: Protect data from accidental modification.
+
+```python
+# List - can be changed (sometimes accidentally!)
+user = ["Alice", 25, "alice@email.com"]
+user[2] = "wrong@email.com"  # Oops! Typo
+
+# Tuple - cannot be changed (safer!)
+user = ("Alice", 25, "alice@email.com")
+# user[2] = "anything"  # ERROR! TypeError
+```
+
+**Real-world uses**:
+- GPS coordinates: `(latitude, longitude)`
+- RGB colors: `(red, green, blue)`
+- Date/time: `(year, month, day)`
+- Function return multiple values
+- Dictionary keys (lists can't be keys!)
+
+### Accessing Tuples
+
+Works just like lists!
+
+```python
+point = (10, 20, 30)
+
+# Indexing
+x = point[0]  # 10
+y = point[1]  # 20
+z = point[-1]  # 30 (last item)
+
+# Slicing
+first_two = point[:2]  # (10, 20)
+
+# Length
+size = len(point)  # 3
+
+# Iteration
+for coord in point:
+    print(coord)
+```
+
+### Tuple Unpacking
+
+**Super useful feature**: Extract values in one line!
+
+```python
+# Without unpacking
+person = ("Alice", 25, "Engineer")
+name = person[0]
+age = person[1]
+job = person[2]
+
+# With unpacking (elegant!)
+name, age, job = ("Alice", 25, "Engineer")
+print(name)  # Alice
+print(age)   # 25
+
+# Swap variables (classic trick!)
+a = 5
+b = 10
+a, b = b, a  # Swap!
+print(a)  # 10
+print(b)  # 5
+
+# Partial unpacking with *
+first, *middle, last = (1, 2, 3, 4, 5)
+print(first)   # 1
+print(middle)  # [2, 3, 4]
+print(last)    # 5
+```
+
+### Tuple Methods
+
+Only 2 methods (because immutable!):
+
+```python
+numbers = (1, 2, 3, 2, 4, 2, 5)
+
+# count() - count occurrences
+count = numbers.count(2)  # 3
+
+# index() - find position
+position = numbers.index(4)  # 4
+```
+
+### Tuples vs Lists
+
+```python
+# LISTS - Mutable
+my_list = [1, 2, 3]
+my_list[0] = 999  # Works!
+my_list.append(4)  # Works!
+my_list.sort()     # Works!
+
+# TUPLES - Immutable
+my_tuple = (1, 2, 3)
+# my_tuple[0] = 999   # ERROR!
+# my_tuple.append(4)  # ERROR!
+# my_tuple.sort()     # ERROR!
+
+# But you can create NEW tuple
+my_tuple = my_tuple + (4,)  # (1, 2, 3, 4)
+```
+
+**When to use what**:
+- **Use list**: Need to add/remove/change items
+- **Use tuple**: Data shouldn't change (coordinates, settings, return values)
+
+### Real-World Example
+
+```python
+# Function returning multiple values
+def get_user_info():
+    name = "Alice"
+    age = 25
+    email = "alice@email.com"
+    return name, age, email  # Returns tuple!
+
+# Unpack the result
+name, age, email = get_user_info()
+print(f"{name} is {age} years old")
+
+# Database-style records (immutable rows)
+users = [
+    ("Alice", 25, "Engineer"),
+    ("Bob", 30, "Designer"),
+    ("Charlie", 35, "Manager")
+]
+
+for name, age, job in users:
+    print(f"{name}, {age}, {job}")
+```
+
+---
+
+## Part 3: Sets - Unique Collections
+
+### What Are Sets?
+
+**A set is an unordered collection of UNIQUE items.**
+
+Think of sets as:
+- A bag of lottery balls (no duplicates, no specific order)
+- Club membership (each person listed once)
+- Unique tags on a blog post
+
+```python
+# Creating sets
+fruits = {"apple", "banana", "cherry"}
+numbers = {1, 2, 3, 4, 5}
+
+# Empty set (NOT {}, that's a dict!)
+empty_set = set()
+
+# From list (removes duplicates!)
+numbers = [1, 2, 2, 3, 3, 3, 4]
+unique = set(numbers)  # {1, 2, 3, 4}
+print(unique)
+
+# Sets are UNORDERED
+my_set = {3, 1, 2}
+print(my_set)  # Might print {1, 2, 3} or different order!
+```
+
+### Why Use Sets?
+
+**Problem sets solve**: Automatically remove duplicates and fast membership testing.
+
+```python
+# List with duplicates (bad for unique items)
+emails = ["alice@ex.com", "bob@ex.com", "alice@ex.com"]
+# Need to manually check for duplicates
+
+# Set automatically removes duplicates!
+emails = {"alice@ex.com", "bob@ex.com", "alice@ex.com"}
+print(emails)  # {'alice@ex.com', 'bob@ex.com'}
+
+# FAST membership testing (way faster than lists!)
+huge_list = list(range(1000000))
+huge_set = set(range(1000000))
+
+# This is SLOW
+# if 999999 in huge_list:  # Checks every item!
+
+# This is FAST
+if 999999 in huge_set:  # Instant lookup!
+    print("Found it!")
+```
+
+### Adding and Removing
+
+```python
+fruits = {"apple", "banana"}
+
+# Add single item
+fruits.add("cherry")
+print(fruits)  # {'apple', 'banana', 'cherry'}
+
+# Add won't create duplicates
+fruits.add("apple")  # Already exists, nothing happens
+print(fruits)  # Still {'apple', 'banana', 'cherry'}
+
+# Add multiple items
+fruits.update(["mango", "grape"])
+# or
+fruits.update({"mango", "grape"})
+
+# Remove (error if not found)
+fruits.remove("banana")
+# fruits.remove("xyz")  # ERROR! KeyError
+
+# Discard (no error if not found)
+fruits.discard("banana")  # Safe even if not there
+fruits.discard("xyz")      # No error
+
+# Pop (remove random item)
+item = fruits.pop()
+print(f"Removed: {item}")
+
+# Clear all
+fruits.clear()
+```
+
+### Set Operations (Mathematical!)
+
+Sets support mathematical operations:
+
+```python
+set1 = {1, 2, 3, 4, 5}
+set2 = {4, 5, 6, 7, 8}
+
+# UNION (all items from both sets)
+union = set1 | set2
+# or
+union = set1.union(set2)
+print(union)  # {1, 2, 3, 4, 5, 6, 7, 8}
+
+# INTERSECTION (items in BOTH sets)
+intersection = set1 & set2
+# or
+intersection = set1.intersection(set2)
+print(intersection)  # {4, 5}
+
+# DIFFERENCE (in set1 but NOT in set2)
+difference = set1 - set2
+# or
+difference = set1.difference(set2)
+print(difference)  # {1, 2, 3}
+
+# SYMMETRIC DIFFERENCE (in one or other, but NOT both)
+sym_diff = set1 ^ set2
+# or
+sym_diff = set1.symmetric_difference(set2)
+print(sym_diff)  # {1, 2, 3, 6, 7, 8}
+```
+
+### Real-World Examples
+
+```python
+# Example 1: Remove duplicates from list
+numbers = [1, 2, 2, 3, 3, 3, 4, 4, 5]
+unique_numbers = list(set(numbers))
+print(unique_numbers)  # [1, 2, 3, 4, 5] (order may vary)
+
+# Example 2: Find common interests
+alice_hobbies = {"reading", "hiking", "cooking"}
+bob_hobbies = {"hiking", "gaming", "cooking"}
+
+common = alice_hobbies & bob_hobbies
+print(f"Common hobbies: {common}")  # {'hiking', 'cooking'}
+
+# Example 3: Email subscription management
+active_users = {"alice", "bob", "charlie", "david"}
+unsubscribed = {"bob", "david"}
+
+still_active = active_users - unsubscribed
+print(f"Active: {still_active}")  # {'alice', 'charlie'}
+
+# Example 4: Unique words in text
+text = "the quick brown fox jumps over the lazy dog"
+words = text.split()
+unique_words = set(words)
+print(f"Unique words: {len(unique_words)}")  # 8 (not 9, "the" appears twice)
+```
+
+### Set Comprehensions
+
+Just like list comprehensions!
+
+```python
+# Create set of squares
+squares = {x**2 for x in range(10)}
+print(squares)  # {0, 1, 4, 9, 16, 25, 36, 49, 64, 81}
+
+# Even numbers from list
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+evens = {x for x in numbers if x % 2 == 0}
+print(evens)  # {2, 4, 6, 8, 10}
+
+# Unique first letters
+words = ["apple", "apricot", "banana", "berry", "cherry"]
+first_letters = {word[0] for word in words}
+print(first_letters)  # {'a', 'b', 'c'}
+```
+
+---
+
+## Part 4: Dictionaries - Key-Value Pairs
+
+### What Are Dictionaries?
+
+**A dictionary stores data as key-value pairs (like a real dictionary: word → definition).**
+
+Think of dictionaries as:
+- Phone book: name → phone number
+- Settings: setting_name → value
+- Translation: English word → Spanish word
+
+```python
+# Creating dictionaries
+person = {
+    "name": "Alice",
+    "age": 25,
+    "job": "Engineer"
+}
+
+# Different ways to create
+# Method 1: Literal
+user = {"name": "Bob", "age": 30}
+
+# Method 2: dict() constructor
+user = dict(name="Bob", age=30)
+
+# Method 3: From list of tuples
+pairs = [("name", "Bob"), ("age", 30)]
+user = dict(pairs)
+
+# Empty dictionary
+empty = {}
+# or
+empty = dict()
+```
+
+### Why Use Dictionaries?
+
+**Problem dictionaries solve**: Fast lookup by meaningful keys (not just numbers like lists).
+
+```python
+# List - lookup by position (confusing!)
+user = ["Alice", 25, "alice@email.com"]
+print(user[0])  # What's 0 again? Name? Age?
+print(user[1])  # Is this age or email?
+
+# Dictionary - lookup by meaningful name (clear!)
+user = {
+    "name": "Alice",
+    "age": 25,
+    "email": "alice@email.com"
+}
+print(user["name"])   # Clear! It's the name
+print(user["age"])    # Clear! It's the age
+
+# FAST lookup (instant, even with millions of items!)
+phone_book = {
+    "Alice": "555-1234",
+    "Bob": "555-5678",
+    "Charlie": "555-9012"
+}
+print(phone_book["Bob"])  # Instant! No loop needed!
+```
+
+### Accessing Dictionary Data
+
+```python
+person = {
+    "name": "Alice",
+    "age": 25,
+    "city": "NYC"
+}
+
+# Access with brackets
+name = person["name"]  # "Alice"
+# missing = person["job"]  # ERROR! KeyError
+
+# Access with get() (safer!)
+name = person.get("name")  # "Alice"
+job = person.get("job")    # None (no error!)
+job = person.get("job", "Unknown")  # "Unknown" (default value)
+
+# Check if key exists
+if "age" in person:
+    print(f"Age: {person['age']}")
+
+# Get all keys
+keys = person.keys()  # dict_keys(['name', 'age', 'city'])
+
+# Get all values
+values = person.values()  # dict_values(['Alice', 25, 'NYC'])
+
+# Get all key-value pairs
+items = person.items()  # dict_items([('name', 'Alice'), ...])
+```
+
+### Adding and Modifying
+
+```python
+person = {"name": "Alice", "age": 25}
+
+# Add new key-value
+person["job"] = "Engineer"
+print(person)  # {'name': 'Alice', 'age': 25, 'job': 'Engineer'}
+
+# Modify existing value
+person["age"] = 26
+print(person)  # age is now 26
+
+# Add multiple items
+person.update({"city": "NYC", "salary": 75000})
+
+# Remove item
+del person["salary"]
+
+# Remove and return value
+age = person.pop("age")  # Returns 26, removes from dict
+# missing = person.pop("xyz")  # ERROR!
+missing = person.pop("xyz", None)  # Returns None, no error
+
+# Remove last inserted (Python 3.7+)
+last_item = person.popitem()
+
+# Clear all
+person.clear()
+```
+
+### Iterating Over Dictionaries
+
+```python
+person = {
+    "name": "Alice",
+    "age": 25,
+    "job": "Engineer"
+}
+
+# Iterate over keys (default)
+for key in person:
+    print(key)
+# Output: name, age, job
+
+# Iterate over keys (explicit)
+for key in person.keys():
+    print(key)
+
+# Iterate over values
+for value in person.values():
+    print(value)
+# Output: Alice, 25, Engineer
+
+# Iterate over key-value pairs (BEST!)
+for key, value in person.items():
+    print(f"{key}: {value}")
+# Output:
+# name: Alice
+# age: 25
+# job: Engineer
+```
+
+### Nested Dictionaries
+
+Dictionaries can contain other dictionaries!
+
+```python
+# Database-like structure
+users = {
+    "user1": {
+        "name": "Alice",
+        "age": 25,
+        "email": "alice@email.com"
+    },
+    "user2": {
+        "name": "Bob",
+        "age": 30,
+        "email": "bob@email.com"
+    }
+}
+
+# Access nested data
+alice_email = users["user1"]["email"]
+print(alice_email)  # alice@email.com
+
+# Iterate nested dict
+for user_id, user_data in users.items():
+    print(f"{user_id}:")
+    for key, value in user_data.items():
+        print(f"  {key}: {value}")
+```
+
+### Dictionary Comprehensions
+
+Create dictionaries elegantly!
+
+```python
+# Create dict from lists
+keys = ["name", "age", "job"]
+values = ["Alice", 25, "Engineer"]
+person = {k: v for k, v in zip(keys, values)}
+print(person)  # {'name': 'Alice', 'age': 25, 'job': 'Engineer'}
+
+# Square numbers
+squares = {x: x**2 for x in range(5)}
+print(squares)  # {0: 0, 1: 1, 2: 4, 3: 9, 4: 16}
+
+# Filter with condition
+numbers = {"a": 1, "b": 2, "c": 3, "d": 4}
+evens = {k: v for k, v in numbers.items() if v % 2 == 0}
+print(evens)  # {'b': 2, 'd': 4}
+
+# Transform values
+prices = {"apple": 2.50, "banana": 1.50, "cherry": 3.00}
+discounted = {k: v * 0.9 for k, v in prices.items()}
+print(discounted)  # 10% off all prices
+```
+
+---
+
+## Part 5: Choosing the Right Data Structure
+
+### Decision Guide
+
+```python
+# Need to store ordered items that can change?
+# → LIST
+shopping_list = ["milk", "bread", "eggs"]
+
+# Need to store ordered items that CAN'T change?
+# → TUPLE
+coordinates = (40.7128, -74.0060)
+
+# Need to store unique items only?
+# → SET
+unique_tags = {"python", "coding", "tutorial"}
+
+# Need to look up values by meaningful names/keys?
+# → DICTIONARY
+user = {"name": "Alice", "age": 25}
+```
+
+### Comparison Table
+
+| Feature | List | Tuple | Set | Dictionary |
+|---------|------|-------|-----|------------|
+| **Ordered** | ✅ Yes | ✅ Yes | ❌ No | ✅ Yes (3.7+) |
+| **Mutable** | ✅ Yes | ❌ No | ✅ Yes | ✅ Yes |
+| **Duplicates** | ✅ Allowed | ✅ Allowed | ❌ No | Keys: ❌ No<br>Values: ✅ Yes |
+| **Indexing** | ✅ `list[0]` | ✅ `tuple[0]` | ❌ No | ✅ `dict["key"]` |
+| **Syntax** | `[1, 2, 3]` | `(1, 2, 3)` | `{1, 2, 3}` | `{"a": 1}` |
+| **Best For** | General use | Fixed data | Unique items | Key-value lookup |
+
+### Real-World Scenarios
+
+```python
+# Scenario 1: Student grades (ordered, need to calculate)
+grades = [85, 92, 78, 95, 88]  # LIST
+average = sum(grades) / len(grades)
+
+# Scenario 2: RGB color (fixed, won't change)
+red = (255, 0, 0)  # TUPLE
+# red[0] = 200  # ERROR! Can't change
+
+# Scenario 3: Unique attendees
+attendees = {"Alice", "Bob", "Charlie"}  # SET
+attendees.add("Alice")  # No duplicate added
+
+# Scenario 4: User profile (lookup by field name)
+profile = {  # DICTIONARY
+    "username": "alice123",
+    "email": "alice@email.com",
+    "age": 25
+}
+print(profile["email"])  # Fast lookup!
+```
+
+---
+
+## Part 6: Common Operations Across Structures
+
+### Membership Testing
+
+```python
+# All support 'in' operator
+my_list = [1, 2, 3]
+my_tuple = (1, 2, 3)
+my_set = {1, 2, 3}
+my_dict = {"a": 1, "b": 2}
+
+print(2 in my_list)    # True
+print(2 in my_tuple)   # True
+print(2 in my_set)     # True (FASTEST!)
+print("a" in my_dict)  # True (checks keys)
+print(1 in my_dict.values())  # True (checks values)
+```
+
+### Length
+
+```python
+print(len([1, 2, 3]))           # 3
+print(len((1, 2, 3)))           # 3
+print(len({1, 2, 3}))           # 3
+print(len({"a": 1, "b": 2}))    # 2
+```
+
+### Conversion Between Types
+
+```python
+# List ←→ Tuple
+my_list = [1, 2, 3]
+my_tuple = tuple(my_list)  # (1, 2, 3)
+back_to_list = list(my_tuple)  # [1, 2, 3]
+
+# List ←→ Set
+my_list = [1, 2, 2, 3, 3]
+my_set = set(my_list)  # {1, 2, 3} (duplicates removed!)
+back_to_list = list(my_set)  # [1, 2, 3]
+
+# Dictionary ←→ Others
+my_dict = {"a": 1, "b": 2}
+keys_list = list(my_dict.keys())      # ['a', 'b']
+values_list = list(my_dict.values())  # [1, 2]
+items_list = list(my_dict.items())    # [('a', 1), ('b', 2)]
+```
+
+### Copying
+
+```python
+# Shallow copy (all types)
+list1 = [1, 2, 3]
+list2 = list1.copy()
+# or
+list2 = list1[:]
+# or
+list2 = list(list1)
+
+# Dictionary copy
+dict1 = {"a": 1}
+dict2 = dict1.copy()
+
+# Set copy
+set1 = {1, 2, 3}
+set2 = set1.copy()
+
+# Tuples don't need copying (immutable!)
+tuple1 = (1, 2, 3)
+tuple2 = tuple1  # Safe! Can't be changed anyway
+```
+
+---
+
+**End of Part 1: Foundation**
+
+**Coming Next**: Part 2 will cover advanced operations, nested structures, and practical patterns for all three data structures!
